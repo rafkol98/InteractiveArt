@@ -1,18 +1,20 @@
 let serial;
-let portnName = '/dev/tty.usbmodem145301'
+let portnName = '/dev/tty.usbmodem143301'
 let inData;
 
 
 var canvas; // pointer to the canvas.
 var agents = [];
-var agentCount = 10;
+var agentCount = 1;
 var noiseScale = 100;
 var noiseStrength = 10;
 var noiseZRange = 1;
 var noiseZVelocity = 1000;
 var overlayAlpha = 10;
-var strokeWidth = 10;
+var strokeWidth = 1;
 var drawMode = 1;
+
+var buttonActivated;
 
 function setup() {
   serial = new p5.SerialPort('192.168.0.4')
@@ -34,25 +36,50 @@ function serialEvent() {
 
 
   if (inString.length > 0) {
-
     // Split the string to read values.
     var sensors = split(inString, ';');
+
     if (sensors.length == 4) {
+      var potentiometer = sensors[0];
+      var ultrasound = sensors[1];
+      var joy_x = sensors[2];
+      var joy_pressed = sensors[3];
 
-    
-     hovering(sensors[2])
+      hovering(joy_x);
 
-
-      console.log(sensors[2])
-      if ((sensors[0] > agentCount) || (sensors[0] < agentCount)) {
-        agents.length = 0; // empty array.
-        agentCount = sensors[0];
-        initialiseAgents();
+      if (joy_pressed == 1) {
+        buttonActivated = joy_x;
+        activateOption(buttonActivated);
       }
 
+      console.log(buttonActivated);
+
+      // NUMBER AGENTS.
+      if (buttonActivated == 1) {
+        if ((potentiometer > agentCount) || (potentiometer < agentCount)) {
+          agents.length = 0; // empty array.
+          agentCount = potentiometer;
+          initialiseAgents();
+        }
+      }
+      // NOISE STRENGTH.
+      else if (buttonActivated == 2) {
+        noiseStrength = scalex(potentiometer, 0, 255, 1, 1000);
+      }
+      // STROKE WIDTH.
+      else if (buttonActivated == 3) {
+        strokeWidth = scalex(potentiometer, 0, 255, 1, 10);
+      }
+      // AGENTS COLOUR.
+      else if (buttonActivated == 4) {
+
+      }
+
+
+
       // Change draw mode.
-      sensors[1] <= 20 ? drawMode = 2 : drawMode = 1;
-    } 
+      ultrasound <= 20 ? drawMode = 2 : drawMode = 1;
+    }
   }
 }
 
@@ -79,7 +106,7 @@ function draw() {
 }
 
 function inBetween(sensorsValue) {
-  return (sensorsValue > (agentCount-15) && sensorsValue < (agentCount+15))
+  return (sensorsValue > (agentCount - 15) && sensorsValue < (agentCount + 15))
 }
 
 function initialiseAgents() {
@@ -90,14 +117,46 @@ function initialiseAgents() {
   }
 }
 
-function hovering(numberButton){
-  deselectOthers();
-  document.getElementById("button"+numberButton).style.background='#909050';
+/**
+ * Acts as a hovering button - gets activated when joystick is on an option.
+ * @param {} numberButton 
+ */
+function hovering(numberButton) {
+  dehoverOthers();
+  document.getElementById("button" + numberButton).style.background = '#FFA500';
 }
 
-function deselectOthers() {
-  document.getElementById("button1").style.background='#ffffff';
-  document.getElementById("button2").style.background='#ffffff';
-  document.getElementById("button3").style.background='#ffffff';
-  document.getElementById("button4").style.background='#ffffff';
+/**
+ * Deselect other options.
+ */
+function dehoverOthers() {
+  document.getElementById("button1").style.background = '#ffffff';
+  document.getElementById("button2").style.background = '#ffffff';
+  document.getElementById("button3").style.background = '#ffffff';
+  document.getElementById("button4").style.background = '#ffffff';
+}
+
+function deactivateOptions() {
+  document.getElementById("button1").style.borderColor = "black";
+  document.getElementById("button2").style.borderColor = "black";
+  document.getElementById("button3").style.borderColor = "black";
+  document.getElementById("button4").style.borderColor = "black";
+}
+
+function activateOption(numberButton) {
+  deactivateOptions();
+  document.getElementById("button" + numberButton).style.background = '#900000';
+  document.getElementById("button" + numberButton).style.borderColor = "red";
+}
+
+/**
+ * Manual implementation of scale - map function. maps a range of values to another.
+ * @param {*} number 
+ * @param {*} inMin 
+ * @param {*} inMax 
+ * @param {*} outMin 
+ * @param {*} outMax 
+ */
+function scalex(number, inMin, inMax, outMin, outMax) {
+  return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
