@@ -34,7 +34,7 @@ void loop() {
  */
 void useJoystick() {
   int xValue = analogRead(XPIN);   
-  int mappedX = map(xValue, 0, 1023, 1, 4);
+  int mappedX = map(xValue, 0, 1023, 1, 5);
   
   int bValue = digitalRead(BPIN);
   Serial.print(mappedX);

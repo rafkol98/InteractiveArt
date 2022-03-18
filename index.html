@@ -33,6 +33,40 @@
     button {
       border: 3px solid;
     }
+
+    .boxBack {
+      background-color: white; /* Green */
+      border: none;
+      color: black;
+      padding: 0px 60px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border: 2px solid black;
+    }
+
+    .box {
+      background-color: white; /* Green */
+      border: none;
+      color: white;
+      padding: 12px 60px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border: 2px solid black;
+    }
+    .box1 {background-color: #4CAF50;}
+    .box2 {background-color: #008CBA;} /* Blue */
+    .box3 {background-color: #f44336;} /* Red */ 
+    .box4 {background-color: #e7e7e7; color: black;} /* Gray */ 
+    .box5 {background-color: #555555;} /* Black */
+
     
   </style>
 </head>
@@ -40,15 +74,33 @@
 <body>
   <div class="container text-center">
 
-    <div id="sketch"></div>
+      <div id="sketch"></div>
 
-   <div>
-    <button type="button" id="button1">NUMBER AGENTS</button>
-    <button type="button" id="button2">NOISE STRENGTH</button>
-    <button type="button" id="button3">STROKE WIDTH</button>
-    <button type="button" id="button4">AGENTS COLOUR</button>
+      <div>
+        <button class="boxBack">Back</button>
+        <button class="box box1"  id="colour1"></button>
+        <button class="box box2" id="colour2"></button>
+        <button class="box box3" id="colour3"></button>
+        <button class="box box4" id="colour4"></button>
+        <button class="box box5" id="colour5"></button>
+      </div>
+
+      <div>
+        <button type="button" id="button1">NUMBER AGENTS</button>
+        <button type="button" id="button2">NOISE STRENGTH</button>
+        <button type="button" id="button3">STROKE WIDTH</button>
+        <button type="button" id="button4">PRIMARY COLOUR</button>
+        <button type="button" id="button5">SECONDARY COLOUR</button>
+     </div>
+     
+      
    </div>
+
+
+   
   </div>
+
+  
   
 
   

@@ -14,6 +14,11 @@ var overlayAlpha = 10;
 var strokeWidth = 0.3;
 var drawMode = 1;
 
+var secondColourNum= 1;
+var colourNum = 2;
+
+var colPic; 
+
 var buttonActivated;
 
 function setup() {
@@ -21,9 +26,8 @@ function setup() {
   serial.on('data', serialEvent);
   serial.open(portnName);
 
-  canvas = createCanvas(windowWidth / 1.8, windowHeight / 1.1);
+  canvas = createCanvas(windowWidth / 1.5, windowHeight / 1.2);
   canvas.class("sketchStyle")
-  // canvas.position(0, 0,'static')
   fill(0);
   canvas.parent('sketch') // choose a place on the page to be the 'parent' for our script.
 
@@ -45,6 +49,7 @@ function serialEvent() {
       var joy_x = sensors[2];
       var joy_pressed = sensors[3];
 
+      console.log(joy_x)
       hovering(joy_x);
 
       if (joy_pressed == 1) {
@@ -70,12 +75,14 @@ function serialEvent() {
       else if (buttonActivated == 3) {
         strokeWidth = scalex(potentiometer, 0, 255, 0.1, 2);
       }
-      // AGENTS COLOUR.
+      // AGENTS PRIMARY COLOUR.
       else if (buttonActivated == 4) {
-
+        colourNum = parseInt(scalex(potentiometer, 0, 255, 1, 3), 10); // cast to integer.
+      } 
+      // AGENTS SECONDARY COLOUR.
+      else if (buttonActivated == 5) {
+        secondColourNum = parseInt(scalex(potentiometer, 0, 255, 1, 3), 10); // cast to integer.
       }
-
-
 
       // Change draw mode.
       ultrasound <= 20 ? drawMode = 2 : drawMode = 1;
@@ -84,18 +91,13 @@ function serialEvent() {
 }
 
 function draw() {
-
   fill(0, overlayAlpha);
   noStroke();
   rect(0, 0, width, height);
 
   for (var i = 0; i < agentCount; i++) {
-    if (i % 10 == 0) {
-      stroke(10, 255, 10)
-    } else {
-      stroke(255, 10, 10)
+    colour(i); // colour the lines.
 
-    }
     if (drawMode == 1) {
       agents[i].modeOne(strokeWidth, noiseScale, noiseStrength, noiseZVelocity);
     } else {
@@ -134,6 +136,7 @@ function dehoverOthers() {
   document.getElementById("button2").style.background = '#ffffff';
   document.getElementById("button3").style.background = '#ffffff';
   document.getElementById("button4").style.background = '#ffffff';
+  document.getElementById("button5").style.background = '#ffffff';
 }
 
 function deactivateOptions() {
@@ -141,6 +144,7 @@ function deactivateOptions() {
   document.getElementById("button2").style.borderColor = "black";
   document.getElementById("button3").style.borderColor = "black";
   document.getElementById("button4").style.borderColor = "black";
+  document.getElementById("button5").style.borderColor = "black";
 }
 
 function activateOption(numberButton) {
@@ -159,4 +163,24 @@ function activateOption(numberButton) {
  */
 function scalex(number, inMin, inMax, outMin, outMax) {
   return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+}
+
+function colour(index) {
+  // primary colour.
+  if (colourNum == 1) {
+    stroke(10, 255, 10)
+  } else if (colourNum == 2) {
+    stroke(255, 10, 10)
+  } else if (colourNum == 3) {
+    stroke(10, 10, 255)
+  }
+
+  // second colour.
+  if (secondColourNum == 1 && (index % 10 == 0)) {
+    stroke(10, 255, 10)
+  } else if (secondColourNum == 2 && (index % 10 == 0)) {
+    stroke(255, 10, 10)
+  } else if (secondColourNum == 3 && (index % 10 == 0)) {
+    stroke(10, 10, 255)
+  }
 }
