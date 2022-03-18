@@ -1,17 +1,17 @@
 let serial;
-let portnName = '/dev/tty.usbmodem143301'
+let portnName = '/dev/tty.usbmodem145401'
 let inData;
 
 
 var canvas; // pointer to the canvas.
 var agents = [];
-var agentCount = 1;
+var agentCount = 4000;
 var noiseScale = 100;
 var noiseStrength = 10;
-var noiseZRange = 1;
-var noiseZVelocity = 1000;
+var noiseZRange = 0.4;
+var noiseZVelocity = 0.01;
 var overlayAlpha = 10;
-var strokeWidth = 1;
+var strokeWidth = 0.3;
 var drawMode = 1;
 
 var buttonActivated;
@@ -58,7 +58,7 @@ function serialEvent() {
       if (buttonActivated == 1) {
         if ((potentiometer > agentCount) || (potentiometer < agentCount)) {
           agents.length = 0; // empty array.
-          agentCount = potentiometer;
+          agentCount = scalex(potentiometer, 0, 255, 1, 8000);
           initialiseAgents();
         }
       }
@@ -68,7 +68,7 @@ function serialEvent() {
       }
       // STROKE WIDTH.
       else if (buttonActivated == 3) {
-        strokeWidth = scalex(potentiometer, 0, 255, 1, 10);
+        strokeWidth = scalex(potentiometer, 0, 255, 0.1, 2);
       }
       // AGENTS COLOUR.
       else if (buttonActivated == 4) {
