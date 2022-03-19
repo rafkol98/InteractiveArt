@@ -4,12 +4,6 @@ let inData;
 
 var canvas; // pointer to the canvas.
 
-// ml5.js handpose technique.
-let handpose;
-let video;
-var arrayHand = new Array();
-
-
 // Interactive agents.
 var agents = [];
 var agentCount = 4000;
@@ -31,13 +25,11 @@ var ready = false;
 
 function setup() {
   // serial communication.
-  serial = new p5.SerialPort('172.20.10.4')
+  serial = new p5.SerialPort('192.168.0.4')
   serial.on('data', serialEvent);
   serial.open(portnName);
-  
-  handleHandpose();
 
-  canvas = createCanvas(windowWidth / 1.5, windowHeight / 1.2);
+  canvas = createCanvas(windowWidth / 1.8, windowHeight / 1.2);
   canvas.class("sketchStyle")
   fill(0);
   canvas.parent('sketch') // choose a place on the page to be the 'parent' for our script.
@@ -54,21 +46,41 @@ function serialEvent() {
     // Split the string to read values.
     var sensors = split(inString, ';');
 
-    if (sensors.length == 4) {
+    if (sensors.length == 5) {
       var potentiometer = sensors[0];
       var ultrasound = sensors[1];
       var joy_x = sensors[2];
-      var joy_pressed = sensors[3];
+      var joy_colour = sensors[3];
+      var joy_pressed = sensors[4];
+      
 
       console.log(joy_x)
-      hovering(joy_x);
-
-      if (joy_pressed == 1) {
-        buttonActivated = joy_x;
-        activateOption(buttonActivated);
+      // hover the options, except if button activated is 4 or 5.
+      if (buttonActivated != 4 && buttonActivated != 5) {
+        hovering("button",joy_x);
+      } else {
+        hovering("colour", joy_colour)
       }
 
-      console.log(buttonActivated);
+      if (joy_pressed == 1) {
+        // if button activated is 4 then set the primary colour as the one selected.
+        if (buttonActivated == 4) {
+          colourNum = joy_colour;
+          activateOption("colour",colourNum);
+        } 
+        // if button activated is 5 then set the secondary colour as the one selected.
+        else if (buttonActivated == 5) {
+          secondColourNum = joy_colour;
+          activateOption("colour",colourNum);
+        } 
+        
+        else {
+          buttonActivated = joy_x;
+          activateOption("button",buttonActivated);
+        }
+      }
+
+      console.log("act: "+buttonActivated);
 
       // NUMBER AGENTS.
       if (buttonActivated == 1) {
@@ -88,11 +100,11 @@ function serialEvent() {
       }
       // AGENTS PRIMARY COLOUR.
       else if (buttonActivated == 4) {
-        colourNum = parseInt(scalex(potentiometer, 0, 255, 1, 3), 10); // cast to integer.
+        serial.write("primary*" + joy_colour + ";");
       } 
       // AGENTS SECONDARY COLOUR.
       else if (buttonActivated == 5) {
-        secondColourNum = parseInt(scalex(potentiometer, 0, 255, 1, 3), 10); // cast to integer.
+        serial.write("secondary*" + joy_colour + ";");
       }
 
       // Change draw mode.
@@ -102,13 +114,6 @@ function serialEvent() {
 }
 
 function draw() {
-  if (ready) {
-
-    if(arrayHand.length > 30) {
-      saveCanvas('myCanvas', 'jpg');
-      arrayHand = [];
-    }
-
     fill(0, overlayAlpha);
     noStroke();
     rect(0, 0, width, height);
@@ -122,11 +127,6 @@ function draw() {
         agents[i].modeTwo(strokeWidth, noiseScale, noiseStrength, noiseZVelocity);
       }
     }
-  } else {
-    text("loading model..")
-  }
-  
-
 }
 
 function inBetween(sensorsValue) {
@@ -145,37 +145,52 @@ function initialiseAgents() {
  * Acts as a hovering button - gets activated when joystick is on an option.
  * @param {} numberButton 
  */
-function hovering(numberButton) {
-  dehoverOthers();
-  document.getElementById("button" + numberButton).style.background = '#FFA500';
+function hovering(stringIn, numberButton) {
+  dehoverOthers(stringIn);
+  if (stringIn == "button") {
+    document.getElementById(stringIn + numberButton).style.background = '#FFA500';
+  } else {
+    console.log(stringIn+ numberButton);
+    document.getElementById(stringIn+ numberButton).style.borderColor = "orange";
+  }
 }
 
 /**
  * Deselect other options.
  */
-function dehoverOthers() {
-  document.getElementById("button1").style.background = '#ffffff';
-  document.getElementById("button2").style.background = '#ffffff';
-  document.getElementById("button3").style.background = '#ffffff';
-  document.getElementById("button4").style.background = '#ffffff';
-  document.getElementById("button5").style.background = '#ffffff';
+function dehoverOthers(stringIn) {
+  if (stringIn == "button") {
+    for(let i = 1; i <=5; i++) {
+      document.getElementById(stringIn+i).style.background = '#ffffff';
+    }
+  } else {
+    for(let i = 0; i <=7; i++) {
+      document.getElementById(stringIn+i).style.borderColor = "black";
+    }
+  }
 }
 
 /**
  * Deactivate options.
  */
-function deactivateOptions() {
-  document.getElementById("button1").style.borderColor = "black";
-  document.getElementById("button2").style.borderColor = "black";
-  document.getElementById("button3").style.borderColor = "black";
-  document.getElementById("button4").style.borderColor = "black";
-  document.getElementById("button5").style.borderColor = "black";
+function deactivateOptions(stringIn) {
+  for(let i = 1; i <= 5; i++) {
+    document.getElementById(stringIn+i).style.borderColor = "black";
+  }
+
+  if (stringIn == 'colour') {
+    document.getElementById(stringIn+"0").style.borderColor = "black";
+    document.getElementById(stringIn+"6").style.borderColor = "black";
+    document.getElementById(stringIn+"7").style.borderColor = "black";
+  }
 }
 
-function activateOption(numberButton) {
-  deactivateOptions();
-  document.getElementById("button" + numberButton).style.background = '#900000';
-  document.getElementById("button" + numberButton).style.borderColor = "red";
+function activateOption(stringIn, numberButton) {
+  deactivateOptions(stringIn);
+  if (stringIn == 'button') {
+    document.getElementById(stringIn + numberButton).style.background = '#900000';
+  }
+  document.getElementById(stringIn + numberButton).style.borderColor = "red";
 }
 
 /**
@@ -192,12 +207,22 @@ function scalex(number, inMin, inMax, outMin, outMax) {
 
 function colour(index) {
   // primary colour.
-  if (colourNum == 1) {
-    stroke(10, 255, 10)
+  if (colourNum == 0) {
+    stroke(255, 255, 255)
+  } else if (colourNum == 1) {
+    stroke(255,0,0)
   } else if (colourNum == 2) {
-    stroke(255, 10, 10)
+    stroke(0, 255, 0)
   } else if (colourNum == 3) {
-    stroke(10, 10, 255)
+    stroke(0, 0, 255)
+  } else if (colourNum == 4) {
+    stroke(255, 20, 147)
+  } else if (colourNum == 5) {
+    stroke(25,25,25)
+  } else if (colourNum == 6) {
+    stroke(0,178,169)
+  } else if (colourNum == 7) {
+    stroke(150,50,0)
   }
 
   // second colour.
@@ -208,25 +233,4 @@ function colour(index) {
   } else if (secondColourNum == 3 && (index % 10 == 0)) {
     stroke(10, 10, 255)
   }
-}
-
-function handleHandpose() {
-  video = createCapture(VIDEO); // create a new video, used to capture the hand.
-  video.size(width, height); 
-  video.hide();
-
-  handpose = ml5.handpose(video, modelReady); // use the handpose model.
-
-  handpose.on("hand", results => {
-    if (results.length > 0 ) {
-      arrayHand.push(true);
-    } else {
-      arrayHand = [];
-    }
-  });
-}
-
-function modelReady() {
-  console.log("Model ready!");
-  ready = true;
 }

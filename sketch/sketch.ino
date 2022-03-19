@@ -14,8 +14,8 @@ const int NUMPIXELS = 8; // number of pixels in the adafruit LED.
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDPIN, NEO_GRB + NEO_KHZ800);
 
 // variable for default colours of agents.
-int primaryColourSelected;
-int secondaryColourSelected;
+int primaryColourSelected = 0;
+int secondaryColourSelected = 0;
 
 // pins for joystick. Only use X as we just want to change between different options.
 const int XPIN = A5;
@@ -32,20 +32,15 @@ void setup() {
 
   pinMode(9,INPUT); 
   digitalWrite(9,HIGH); 
+  turnOffLeds(-1); // turn off ALL leds.
+  lightUpLeds(primaryColourSelected, 1); // light up the initial primary.
 }
 
 void loop() {
   checkSerial();
-  checkSecondary();
-  
   potentiometer();
   calculateDistance();
   useJoystick();
-  turnOffLeds();
-  
-  lightUpLeds(primaryColourSelected, 1); // light up primary colour selected.
-  lightUpLeds(secondaryColourSelected, 0.2); // light up secondary colour selected.
-  pixels.show();
   
   delay(200);
 }
@@ -55,6 +50,8 @@ void loop() {
  * The opacity specifies the opacity level for the LED - different between primary and secondary colours.
  */
 void lightUpLeds(int numberLed, double opacity) {
+    turnOffLeds(opacity);
+    
    switch (numberLed) {
      case 0:
        pixels.setPixelColor(0, pixels.Color(50,50,50) * opacity); // white 
@@ -82,6 +79,8 @@ void lightUpLeds(int numberLed, double opacity) {
       break;
 //  }
   }
+
+   pixels.show();
 }
 
 /**
@@ -89,10 +88,13 @@ void lightUpLeds(int numberLed, double opacity) {
  */
 void useJoystick() {
   int xValue = analogRead(XPIN);   
-  int mappedX = map(xValue, 0, 1023, 1, 5);
+  int mappedX = map(xValue, 0, 1023, 1, 6);
+  int mappedXColours = map(xValue, 0, 1023, -1, 8);
   
   int bValue = digitalRead(BPIN);
   Serial.print(mappedX);
+  Serial.print(";");
+  Serial.print(mappedXColours);
   Serial.print(";");
   Serial.println(!bValue);
 }
@@ -128,12 +130,24 @@ void calculateDistance() {
 }
 
 /**
- * Turn of all LEDs.
+ * Turn of all LEDs except primary when changing secondary and vice versa.
  */
-void turnOffLeds() {
+void turnOffLeds(double primary) {
   // turn off all leds.
   for(int i=0; i<NUMPIXELS; i++) {
-    pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+    if (primary == 1) {
+       // turn off all except Secondary colour.
+       if (i != secondaryColourSelected) {
+        pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+      } 
+    } else if (primary == 0.2) {
+      // turn off all except primary colour.
+      if (i != primaryColourSelected) {
+        pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+      } 
+    } else {
+       pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+    }
   }
 }
 
@@ -143,44 +157,21 @@ void turnOffLeds() {
 void checkSerial() {
   if(Serial.available() > 0) {
     String getStart = Serial.readStringUntil('*');
-    Serial.println("HERE"+ getStart);
-    if (getStart != "") {
+    // light up the primary colour led.
+    if (getStart == "primary") {
       String primaryLedIn = Serial.readStringUntil(';');
       primaryColourSelected = primaryLedIn.toInt();
-
-//      String miaou = Serial.readString('\n');
-//      Serial.println(miaou);
-//      Serial.println(miaou.indexOf("/"));
-//      if (miaou.indexOf("/") > 0) {
-//          Serial.println("mesa");
-//          String secondaryLedIn = Serial.readStringUntil('/');
-//          Serial.println("sec"+secondaryLedIn);
-//          secondaryColourSelected = secondaryLedIn.toInt(); 
-//          Serial.println(secondaryColourSelected);
-//      }
-//    
-//     
-
-      while(Serial.available() > 0) {
-        Serial.read();
-      }
-    }
-  }
-}
-
-/**
- * Check if for new messages on the serial port. This is used to control the LED to light up.
- */
-void checkSecondary() {
-  if(Serial.available() > 0) {
-    String getStart = Serial.readStringUntil('^');
-    if (getStart != "") {
+      lightUpLeds(primaryColourSelected, 1); // light up primary colour selected.  
+    } 
+    // light up the seconary colour led.
+    else if (getStart == "secondary") {
       String secondaryLedIn = Serial.readStringUntil(';');
       secondaryColourSelected = secondaryLedIn.toInt();  
+      lightUpLeds(secondaryColourSelected, 0.2); 
+    }
 
-      while(Serial.available() > 0) {
+     while(Serial.available() > 0) {
         Serial.read();
       }
-    }
   }
 }
