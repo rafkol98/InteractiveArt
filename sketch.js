@@ -6,22 +6,24 @@ var canvas; // pointer to the canvas.
 
 // Interactive agents.
 var agents = [];
-var agentCount = 4000;
-var noiseScale = 100;
-var noiseStrength = 10;
+var agentCount = 100;
+var noiseScale = 100; //TODO
+var noiseStrength = 0;
 var noiseZRange = 0.4;
-var noiseZVelocity = 0.1;
-var overlayAlpha = 10;
+var overlayAlpha = 10; // TODO
 var strokeWidth = 0.3;
 var drawMode = 1;
 
 // Colours.
-var secondColourNum= 1;
-var colourNum = 2;
+var secondColourNum = 0;
+var colourNum = 0;
 
 // Buttons.
 var buttonActivated;
 var ready = false;
+
+// Serial controls.
+var potentiometer, ultrasound, joy_x, joy_colour, joy_pressed;
 
 function setup() {
   // serial communication.
@@ -41,71 +43,32 @@ function serialEvent() {
   // read a string from the serial port until newline is encountered:
   var inString = serial.readStringUntil('\r\n');
 
-
   if (inString.length > 0) {
     // Split the string to read values.
     var sensors = split(inString, ';');
 
     if (sensors.length == 5) {
-      var potentiometer = sensors[0];
-      var ultrasound = sensors[1];
-      var joy_x = sensors[2];
-      var joy_colour = sensors[3];
-      var joy_pressed = sensors[4];
-      
+      // initialise sensors.
+      potentiometer = sensors[0];
+      ultrasound = sensors[1];
+      joy_x = sensors[2];
+      joy_colour = sensors[3];
+      joy_pressed = sensors[4];
 
-      console.log(joy_x)
       // hover the options, except if button activated is 4 or 5.
       if (buttonActivated != 4 && buttonActivated != 5) {
-        hovering("button",joy_x);
-      } else {
+        hovering("button", joy_x);
+      }
+      // hover the colours.
+      else {
         hovering("colour", joy_colour)
       }
 
-      if (joy_pressed == 1) {
-        // if button activated is 4 then set the primary colour as the one selected.
-        if (buttonActivated == 4) {
-          colourNum = joy_colour;
-          activateOption("colour",colourNum);
-        } 
-        // if button activated is 5 then set the secondary colour as the one selected.
-        else if (buttonActivated == 5) {
-          secondColourNum = joy_colour;
-          activateOption("colour",colourNum);
-        } 
-        
-        else {
-          buttonActivated = joy_x;
-          activateOption("button",buttonActivated);
-        }
-      }
+      // Handle press of button.
+      joyButtonPressed();
 
-      console.log("act: "+buttonActivated);
-
-      // NUMBER AGENTS.
-      if (buttonActivated == 1) {
-        if ((potentiometer > agentCount) || (potentiometer < agentCount)) {
-          agents.length = 0; // empty array.
-          agentCount = scalex(potentiometer, 0, 255, 1, 2000);
-          initialiseAgents();
-        }
-      }
-      // NOISE STRENGTH.
-      else if (buttonActivated == 2) {
-        noiseStrength = scalex(potentiometer, 0, 255, 1, 1000);
-      }
-      // STROKE WIDTH.
-      else if (buttonActivated == 3) {
-        strokeWidth = scalex(potentiometer, 0, 255, 0.1, 2);
-      }
-      // AGENTS PRIMARY COLOUR.
-      else if (buttonActivated == 4) {
-        serial.write("primary*" + joy_colour + ";");
-      } 
-      // AGENTS SECONDARY COLOUR.
-      else if (buttonActivated == 5) {
-        serial.write("secondary*" + joy_colour + ";");
-      }
+      // Handle control the options.
+      controlOptions();
 
       // Change draw mode.
       ultrasound <= 20 ? drawMode = 2 : drawMode = 1;
@@ -114,19 +77,19 @@ function serialEvent() {
 }
 
 function draw() {
-    fill(0, overlayAlpha);
-    noStroke();
-    rect(0, 0, width, height);
-  
-    for (var i = 0; i < agentCount; i++) {
-      colour(i); // colour the lines.
-  
-      if (drawMode == 1) {
-        agents[i].modeOne(strokeWidth, noiseScale, noiseStrength, noiseZVelocity);
-      } else {
-        agents[i].modeTwo(strokeWidth, noiseScale, noiseStrength, noiseZVelocity);
-      }
+  fill(0, overlayAlpha);
+  noStroke();
+  rect(0, 0, width, height);
+
+  for (var i = 0; i < agentCount; i++) {
+    colour(i); // colour the lines.
+
+    if (drawMode == 1) {
+      agents[i].modeOne(strokeWidth, noiseScale, noiseStrength);
+    } else {
+      agents[i].modeTwo(strokeWidth, noiseScale, noiseStrength);
     }
+  }
 }
 
 function inBetween(sensorsValue) {
@@ -141,6 +104,75 @@ function initialiseAgents() {
   }
 }
 
+function joyButtonPressed() {
+  if (joy_pressed == 1) {
+    // if button activated is 4 then set the primary colour as the one selected.
+    if (buttonActivated == 4) {
+      if (joy_colour == -1) {
+        buttonActivated = null;
+        deactivateOptions("button");
+        deactivateOptions("colour");
+      } else {
+        colourNum = joy_colour;
+        activateOption("colour", colourNum);
+      }
+    }
+    // if button activated is 5 then set the secondary colour as the one selected.
+    else if (buttonActivated == 5) {
+      if (joy_colour == -1) {
+        buttonActivated = null;
+        deactivateOptions("button");
+        deactivateOptions("colour");
+      } else {
+        secondColourNum = joy_colour;
+        activateOption("colour", colourNum);
+      }
+    }
+    // otherwise it means that we are in the options menu (not colours), therefore change the options.
+    else {
+      buttonActivated = joy_x;
+      activateOption("button", buttonActivated);
+    }
+  }
+}
+
+function controlOptions() {
+  // NUMBER AGENTS.
+  if (buttonActivated == 1) {
+    if ((potentiometer > agentCount) || (potentiometer < agentCount)) {
+      agents.length = 0; // empty array.
+      agentCount = scalex(potentiometer, 0, 255, 1, 2000);
+      initialiseAgents();
+    }
+  }
+  // NOISE STRENGTH.
+  else if (buttonActivated == 2) {
+    noiseStrength = scalex(potentiometer, 0, 255, 1, 1000);
+    console.log(noiseStrength)
+  }
+  // STROKE WIDTH.
+  else if (buttonActivated == 3) {
+    strokeWidth = scalex(potentiometer, 0, 255, 0.1, 2);
+  }
+  // AGENTS PRIMARY COLOUR.
+  else if (buttonActivated == 4) {
+    serial.write("primary*" + joy_colour + ";");
+  }
+  // AGENTS SECONDARY COLOUR.
+  else if (buttonActivated == 5) {
+    serial.write("secondary*" + joy_colour + ";");
+  }
+  // NOISE SCALE.
+  else if (buttonActivated == 6) {
+    noiseScale = scalex(potentiometer, 0, 255, 1, 5000);
+    console.log(noiseScale);
+  }
+  // BACKGROUND ALPHA
+  else if (buttonActivated == 7) {
+    overlayAlpha = scalex(potentiometer, 0, 255, 0.1, 10);
+  }
+}
+
 /**
  * Acts as a hovering button - gets activated when joystick is on an option.
  * @param {} numberButton 
@@ -150,8 +182,7 @@ function hovering(stringIn, numberButton) {
   if (stringIn == "button") {
     document.getElementById(stringIn + numberButton).style.background = '#FFA500';
   } else {
-    console.log(stringIn+ numberButton);
-    document.getElementById(stringIn+ numberButton).style.borderColor = "orange";
+    document.getElementById(stringIn + numberButton).style.borderColor = "orange";
   }
 }
 
@@ -160,12 +191,12 @@ function hovering(stringIn, numberButton) {
  */
 function dehoverOthers(stringIn) {
   if (stringIn == "button") {
-    for(let i = 1; i <=5; i++) {
-      document.getElementById(stringIn+i).style.background = '#ffffff';
+    for (let i = 1; i <= 7; i++) {
+      document.getElementById(stringIn + i).style.background = '#ffffff';
     }
   } else {
-    for(let i = 0; i <=7; i++) {
-      document.getElementById(stringIn+i).style.borderColor = "black";
+    for (let i = -1; i <= 7; i++) {
+      document.getElementById(stringIn + i).style.borderColor = "black";
     }
   }
 }
@@ -174,14 +205,13 @@ function dehoverOthers(stringIn) {
  * Deactivate options.
  */
 function deactivateOptions(stringIn) {
-  for(let i = 1; i <= 5; i++) {
-    document.getElementById(stringIn+i).style.borderColor = "black";
+  for (let i = 1; i <= 7; i++) {
+    document.getElementById(stringIn + i).style.borderColor = "black";
   }
 
   if (stringIn == 'colour') {
-    document.getElementById(stringIn+"0").style.borderColor = "black";
-    document.getElementById(stringIn+"6").style.borderColor = "black";
-    document.getElementById(stringIn+"7").style.borderColor = "black";
+    document.getElementById(stringIn + "-1").style.borderColor = "black";
+    document.getElementById(stringIn + "0").style.borderColor = "black";
   }
 }
 
@@ -210,7 +240,7 @@ function colour(index) {
   if (colourNum == 0) {
     stroke(255, 255, 255)
   } else if (colourNum == 1) {
-    stroke(255,0,0)
+    stroke(255, 0, 0)
   } else if (colourNum == 2) {
     stroke(0, 255, 0)
   } else if (colourNum == 3) {
@@ -218,19 +248,29 @@ function colour(index) {
   } else if (colourNum == 4) {
     stroke(255, 20, 147)
   } else if (colourNum == 5) {
-    stroke(25,25,25)
+    stroke(25, 25, 25)
   } else if (colourNum == 6) {
-    stroke(0,178,169)
+    stroke(0, 178, 169)
   } else if (colourNum == 7) {
-    stroke(150,50,0)
+    stroke(150, 50, 0)
   }
 
   // second colour.
-  if (secondColourNum == 1 && (index % 10 == 0)) {
-    stroke(10, 255, 10)
+  if (secondColourNum == 0 && (index % 10 == 0)) {
+    stroke(255, 255, 255)
+  } else if (secondColourNum == 1 && (index % 10 == 0)) {
+    stroke(255, 0, 0)
   } else if (secondColourNum == 2 && (index % 10 == 0)) {
-    stroke(255, 10, 10)
+    stroke(0, 255, 0)
   } else if (secondColourNum == 3 && (index % 10 == 0)) {
-    stroke(10, 10, 255)
+    stroke(0, 0, 255)
+  } else if (secondColourNum == 4 && (index % 10 == 0)) {
+    stroke(255, 20, 147)
+  } else if (secondColourNum == 5 && (index % 10 == 0)) {
+    stroke(25, 25, 25)
+  } else if (secondColourNum == 6 && (index % 10 == 0)) {
+    stroke(0, 178, 169)
+  } else if (secondColourNum == 7 && (index % 10 == 0)) {
+    stroke(150, 50, 0)
   }
 }

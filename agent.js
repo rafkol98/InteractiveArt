@@ -8,7 +8,7 @@ var Agent = function(noiseZRange) {
   };
   
   // Update agents appearance - make them move given width and velocity.
-  Agent.prototype.update = function(strokeWidth, noiseZVelocity) {
+  Agent.prototype.update = function(strokeWidth) {
     this.vector.x += cos(this.angle) * this.stepSize;
     this.vector.y += sin(this.angle) * this.stepSize;
   
@@ -21,19 +21,18 @@ var Agent = function(noiseZRange) {
     line(this.vectorOld.x, this.vectorOld.y, this.vector.x, this.vector.y);
   
     this.vectorOld = this.vector.copy(); // create old vectors copy.
-    this.noiseZ += noiseZVelocity;
   };
   
   // First mode drawing.
-  Agent.prototype.modeOne = function(strokeWidth, noiseScale, noiseStrength, noiseZVelocity) {
+  Agent.prototype.modeOne = function(strokeWidth, noiseScale, noiseStrength) {
     this.angle = noise(this.vector.x / noiseScale, this.vector.y / noiseScale, this.noiseZ) * noiseStrength;
-    this.update(strokeWidth, noiseZVelocity);
+    this.update(strokeWidth);
   };
   
   // Second mode drawing.
-  Agent.prototype.modeTwo = function(strokeWidth, noiseScale, noiseStrength, noiseZVelocity) {
+  Agent.prototype.modeTwo = function(strokeWidth, noiseScale, noiseStrength) {
     this.angle = noise(this.vector.x / noiseScale, this.vector.y / noiseScale, this.noiseZ) * 24;
     this.angle = (this.angle - floor(this.angle)) * noiseStrength;
-    this.update(strokeWidth, noiseZVelocity);
+    this.update(strokeWidth);
   };
   
