@@ -14,8 +14,7 @@ const int NUMPIXELS = 8; // number of pixels in the adafruit LED.
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDPIN, NEO_GRB + NEO_KHZ800);
 
 // variable for default colours of agents.
-int primaryColourSelected = 0;
-int secondaryColourSelected = 0;
+int colourSelected = 0;
 
 // pins for joystick. Only use X as we just want to change between different options.
 const int XPIN = A5;
@@ -32,8 +31,7 @@ void setup() {
 
   pinMode(9,INPUT); 
   digitalWrite(9,HIGH); 
-  turnOffLeds(-1); // turn off ALL leds.
-  lightUpLeds(primaryColourSelected, 1); // light up the initial primary.
+  turnOffLeds(); // turn off ALL leds.
 }
 
 void loop() {
@@ -49,35 +47,34 @@ void loop() {
  * Light up the Neopixel leds. The given number specifies which LED to light up.
  * The opacity specifies the opacity level for the LED - different between primary and secondary colours.
  */
-void lightUpLeds(int numberLed, double opacity) {
-    turnOffLeds(opacity);
+void lightUpLeds(int numberLed) {
+    turnOffLeds();
     
    switch (numberLed) {
      case 0:
-       pixels.setPixelColor(0, pixels.Color(50,50,50) * opacity); // white 
+       pixels.setPixelColor(0, pixels.Color(50,50,50)); // white 
       break;
     case 1:
-      pixels.setPixelColor(1, pixels.Color(255,0,0) * opacity); // red 
+      pixels.setPixelColor(1, pixels.Color(255,0,0)); // red 
       break;
     case 2:
-      pixels.setPixelColor(2, pixels.Color(0,255,0) * opacity); // green 
+      pixels.setPixelColor(2, pixels.Color(0,255,0)); // green 
       break;
     case 3:
-       pixels.setPixelColor(3, pixels.Color(0,0,255) * opacity); // blue.
+       pixels.setPixelColor(3, pixels.Color(0,0,255)); // blue.
       break;
     case 4:
-       pixels.setPixelColor(4, pixels.Color(255,20,147) * opacity); // pink
+       pixels.setPixelColor(4, pixels.Color(255,20,147)); // pink
       break;
     case 5:
-      pixels.setPixelColor(5, pixels.Color(25,25,25) * opacity); // magenta
+      pixels.setPixelColor(5, pixels.Color(0,0,0)); // black
       break;
     case 6:
-      pixels.setPixelColor(6, pixels.Color(0,178,169) * opacity); // teal
+      pixels.setPixelColor(6, pixels.Color(0,178,169)); // teal
       break;
     case 7:
-      pixels.setPixelColor(7, pixels.Color(150,50,0) * opacity); // orange
+      pixels.setPixelColor(7, pixels.Color(254,80,0)); // orange
       break;
-//  }
   }
 
    pixels.show();
@@ -132,22 +129,10 @@ void calculateDistance() {
 /**
  * Turn of all LEDs except primary when changing secondary and vice versa.
  */
-void turnOffLeds(double primary) {
+void turnOffLeds() {
   // turn off all leds.
   for(int i=0; i<NUMPIXELS; i++) {
-    if (primary == 1) {
-       // turn off all except Secondary colour.
-       if (i != secondaryColourSelected) {
-        pixels.setPixelColor(i, pixels.Color(0, 0, 0));
-      } 
-    } else if (primary == 0.2) {
-      // turn off all except primary colour.
-      if (i != primaryColourSelected) {
-        pixels.setPixelColor(i, pixels.Color(0, 0, 0));
-      } 
-    } else {
-       pixels.setPixelColor(i, pixels.Color(0, 0, 0));
-    }
+   pixels.setPixelColor(i, pixels.Color(0, 0, 0));
   }
 }
 
@@ -158,18 +143,11 @@ void checkSerial() {
   if(Serial.available() > 0) {
     String getStart = Serial.readStringUntil('*');
     // light up the primary colour led.
-    if (getStart == "primary") {
-      String primaryLedIn = Serial.readStringUntil(';');
-      primaryColourSelected = primaryLedIn.toInt();
-      lightUpLeds(primaryColourSelected, 1); // light up primary colour selected.  
-    } 
-    // light up the seconary colour led.
-    else if (getStart == "secondary") {
-      String secondaryLedIn = Serial.readStringUntil(';');
-      secondaryColourSelected = secondaryLedIn.toInt();  
-      lightUpLeds(secondaryColourSelected, 0.2); 
+    if (getStart == "colour") {
+      String ledIn = Serial.readStringUntil(';');
+      colourSelected = ledIn.toInt();
+      lightUpLeds(colourSelected); // light up primary colour selected.  
     }
-
      while(Serial.available() > 0) {
         Serial.read();
       }

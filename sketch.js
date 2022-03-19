@@ -17,6 +17,7 @@ var drawMode = 1;
 // Colours.
 var secondColourNum = 0;
 var colourNum = 0;
+var backgroundColour = [25, 255, 255, overlayAlpha]
 
 // Buttons.
 var buttonActivated;
@@ -77,7 +78,8 @@ function serialEvent() {
 }
 
 function draw() {
-  fill(0, overlayAlpha);
+  var experiment = [25, 255, 255, overlayAlpha]
+  fill(experiment);
   noStroke();
   rect(0, 0, width, height);
 
@@ -155,19 +157,19 @@ function controlOptions() {
     strokeWidth = scalex(potentiometer, 0, 255, 0.1, 2);
   }
   // AGENTS PRIMARY COLOUR.
-  else if (buttonActivated == 4) {
-    serial.write("primary*" + joy_colour + ";");
+  else if (buttonActivated == 4 || buttonActivated == 5) {
+    serial.write("colour*" + joy_colour + ";");
   }
-  // AGENTS SECONDARY COLOUR.
-  else if (buttonActivated == 5) {
-    serial.write("secondary*" + joy_colour + ";");
-  }
+  // // AGENTS SECONDARY COLOUR.
+  // else if (buttonActivated == 5) {
+  //   serial.write("secondary*" + joy_colour + ";");
+  // }
   // NOISE SCALE.
   else if (buttonActivated == 6) {
     noiseScale = scalex(potentiometer, 0, 255, 1, 5000);
     console.log(noiseScale);
   }
-  // BACKGROUND ALPHA
+  // BACKGROUND COLOUR
   else if (buttonActivated == 7) {
     overlayAlpha = scalex(potentiometer, 0, 255, 0.1, 10);
   }
@@ -248,7 +250,7 @@ function colour(index) {
   } else if (colourNum == 4) {
     stroke(255, 20, 147)
   } else if (colourNum == 5) {
-    stroke(25, 25, 25)
+    stroke(0, 0, 0)
   } else if (colourNum == 6) {
     stroke(0, 178, 169)
   } else if (colourNum == 7) {
@@ -267,7 +269,7 @@ function colour(index) {
   } else if (secondColourNum == 4 && (index % 10 == 0)) {
     stroke(255, 20, 147)
   } else if (secondColourNum == 5 && (index % 10 == 0)) {
-    stroke(25, 25, 25)
+    stroke(0, 0, 0)
   } else if (secondColourNum == 6 && (index % 10 == 0)) {
     stroke(0, 178, 169)
   } else if (secondColourNum == 7 && (index % 10 == 0)) {
