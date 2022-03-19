@@ -26,6 +26,9 @@ var ready = false;
 // Serial controls.
 var potentiometer, ultrasound, joy_x, joy_colour, joy_pressed;
 
+// Screenshot using ultrasound sensor.
+var arrayScreenshot = new Array();
+
 function setup() {
   // serial communication.
   serial = new p5.SerialPort('192.168.0.4')
@@ -71,14 +74,20 @@ function serialEvent() {
       // Handle control the options.
       controlOptions();
 
-      // Change draw mode.
-      ultrasound <= 20 ? drawMode = 2 : drawMode = 1;
+      // Check the ultrasound sensor and act appropriately.
+      controlUltrasound();
     }
   }
 }
 
 function draw() {
-  fill(backgroundColour[0],backgroundColour[1],backgroundColour[2], overlayAlpha);
+  // Save canvas if ultrasound array has more than 5 elements.
+  if (arrayScreenshot.length > 5) {
+    saveCanvas('myCanvas', 'jpg');
+    arrayScreenshot = [];
+  }
+
+  fill(backgroundColour[0], backgroundColour[1], backgroundColour[2], overlayAlpha);
   noStroke();
   rect(0, 0, width, height);
 
@@ -91,10 +100,6 @@ function draw() {
       agents[i].modeTwo(strokeWidth, noiseScale, noiseStrength);
     }
   }
-}
-
-function inBetween(sensorsValue) {
-  return (sensorsValue > (agentCount - 15) && sensorsValue < (agentCount + 15))
 }
 
 /**
@@ -182,10 +187,27 @@ function controlOptions() {
   else if (buttonActivated == 6) {
     noiseScale = scalex(potentiometer, 0, 255, 1, 5000);
     console.log(noiseScale);
-  } 
+  }
   else if (buttonActivated == 8) {
     overlayAlpha = scalex(potentiometer, 0, 255, 1, 200);
     console.log(overlayAlpha)
+  }
+}
+
+/**
+ * 
+ */
+function controlUltrasound() {
+  // Change draw mode.
+  ultrasound <= 20 ? drawMode = 2 : drawMode = 1;
+
+  // If ultrasound reading is 1185 it means that the user is touching the sensor.
+  // If they do that then populate an array which will be used to save canvas - screenshot
+  // when it has more than 15 elements i.e. when the user has been holding their hand there for ~1 second.
+  if (ultrasound == 1185) {
+    arrayScreenshot.push(true);
+  } else {
+    arrayScreenshot = [];
   }
 }
 
