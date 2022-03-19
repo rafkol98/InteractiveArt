@@ -31,7 +31,7 @@ var ready = false;
 
 function setup() {
   // serial communication.
-  serial = new p5.SerialPort('192.168.0.4')
+  serial = new p5.SerialPort('172.20.10.4')
   serial.on('data', serialEvent);
   serial.open(portnName);
   
@@ -104,7 +104,7 @@ function serialEvent() {
 function draw() {
   if (ready) {
 
-    if(arrayHand.length > 10) {
+    if(arrayHand.length > 30) {
       saveCanvas('myCanvas', 'jpg');
       arrayHand = [];
     }
