@@ -78,8 +78,7 @@ function serialEvent() {
 }
 
 function draw() {
-  backgroundColour.push(overlayAlpha);
-  fill(backgroundColour);
+  fill(backgroundColour[0],backgroundColour[1],backgroundColour[2], overlayAlpha);
   noStroke();
   rect(0, 0, width, height);
 
@@ -185,8 +184,7 @@ function controlOptions() {
     console.log(noiseScale);
   } 
   else if (buttonActivated == 8) {
-    console.log("mesa")
-    overlayAlpha = scalex(potentiometer, 0, 255, 1, 1000);
+    overlayAlpha = scalex(potentiometer, 0, 255, 1, 200);
     console.log(overlayAlpha)
   }
 }
