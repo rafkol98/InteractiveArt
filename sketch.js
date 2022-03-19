@@ -10,14 +10,14 @@ var agentCount = 100;
 var noiseScale = 100; //TODO
 var noiseStrength = 0;
 var noiseZRange = 0.4;
-var overlayAlpha = 10; // TODO
+var overlayAlpha = 1000; // TODO
 var strokeWidth = 0.3;
 var drawMode = 1;
 
 // Colours.
 var secondColourNum = 0;
 var colourNum = 0;
-var backgroundColour = [25, 255, 255, overlayAlpha]
+var backgroundColour = [20, 20, 20, overlayAlpha]
 
 // Buttons.
 var buttonActivated;
@@ -56,8 +56,8 @@ function serialEvent() {
       joy_colour = sensors[3];
       joy_pressed = sensors[4];
 
-      // hover the options, except if button activated is 4 or 5.
-      if (buttonActivated != 4 && buttonActivated != 5) {
+      // hover the options, except if button activated is 4, 5 or 7.
+      if (buttonActivated != 4 && buttonActivated != 5 && buttonActivated != 7) {
         hovering("button", joy_x);
       }
       // hover the colours.
@@ -78,8 +78,7 @@ function serialEvent() {
 }
 
 function draw() {
-  var experiment = [25, 255, 255, overlayAlpha]
-  fill(experiment);
+  fill(backgroundColour);
   noStroke();
   rect(0, 0, width, height);
 
@@ -98,12 +97,22 @@ function inBetween(sensorsValue) {
   return (sensorsValue > (agentCount - 15) && sensorsValue < (agentCount + 15))
 }
 
+/**
+ * Initialise the agents.
+ */
 function initialiseAgents() {
-
-  // initialise agents.
   for (var i = 0; i < agentCount; i++) {
     agents[i] = new Agent(noiseZRange);
   }
+}
+
+/**
+ * Handle the go back button.
+ */
+function goBackButton() {
+  buttonActivated = null;
+  deactivateOptions("button");
+  deactivateOptions("colour");
 }
 
 function joyButtonPressed() {
@@ -111,9 +120,7 @@ function joyButtonPressed() {
     // if button activated is 4 then set the primary colour as the one selected.
     if (buttonActivated == 4) {
       if (joy_colour == -1) {
-        buttonActivated = null;
-        deactivateOptions("button");
-        deactivateOptions("colour");
+        goBackButton();
       } else {
         colourNum = joy_colour;
         activateOption("colour", colourNum);
@@ -122,11 +129,16 @@ function joyButtonPressed() {
     // if button activated is 5 then set the secondary colour as the one selected.
     else if (buttonActivated == 5) {
       if (joy_colour == -1) {
-        buttonActivated = null;
-        deactivateOptions("button");
-        deactivateOptions("colour");
+        goBackButton();
       } else {
         secondColourNum = joy_colour;
+        activateOption("colour", colourNum);
+      }
+    } else if (buttonActivated == 7) {
+      if (joy_colour == -1) {
+        goBackButton();
+      } else {
+        updateBackgroundColour(joy_colour);
         activateOption("colour", colourNum);
       }
     }
@@ -150,28 +162,19 @@ function controlOptions() {
   // NOISE STRENGTH.
   else if (buttonActivated == 2) {
     noiseStrength = scalex(potentiometer, 0, 255, 1, 1000);
-    console.log(noiseStrength)
   }
   // STROKE WIDTH.
   else if (buttonActivated == 3) {
     strokeWidth = scalex(potentiometer, 0, 255, 0.1, 2);
   }
   // AGENTS PRIMARY COLOUR.
-  else if (buttonActivated == 4 || buttonActivated == 5) {
+  else if (buttonActivated == 4 || buttonActivated == 5 || buttonActivated == 7) {
     serial.write("colour*" + joy_colour + ";");
   }
-  // // AGENTS SECONDARY COLOUR.
-  // else if (buttonActivated == 5) {
-  //   serial.write("secondary*" + joy_colour + ";");
-  // }
   // NOISE SCALE.
   else if (buttonActivated == 6) {
     noiseScale = scalex(potentiometer, 0, 255, 1, 5000);
     console.log(noiseScale);
-  }
-  // BACKGROUND COLOUR
-  else if (buttonActivated == 7) {
-    overlayAlpha = scalex(potentiometer, 0, 255, 0.1, 10);
   }
 }
 
@@ -217,6 +220,11 @@ function deactivateOptions(stringIn) {
   }
 }
 
+/**
+ * Activate an option.
+ * @param {*} stringIn 
+ * @param {*} numberButton 
+ */
 function activateOption(stringIn, numberButton) {
   deactivateOptions(stringIn);
   if (stringIn == 'button') {
@@ -235,6 +243,27 @@ function activateOption(stringIn, numberButton) {
  */
 function scalex(number, inMin, inMax, outMin, outMax) {
   return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+}
+
+function updateBackgroundColour(colourNum) {
+  // background colour.
+  if (colourNum == 0) {
+    backgroundColour = [255, 255, 255, overlayAlpha]
+  } else if (colourNum == 1) {
+    backgroundColour = [255, 0, 0, overlayAlpha]
+  } else if (colourNum == 2) {
+    backgroundColour = [0, 255, 0, overlayAlpha]
+  } else if (colourNum == 3) {
+    backgroundColour = [0, 0, 255, overlayAlpha]
+  } else if (colourNum == 4) {
+    backgroundColour = [255, 20, 147, overlayAlpha]
+  } else if (colourNum == 5) {
+    backgroundColour = [0, 0, 0, overlayAlpha]
+  } else if (colourNum == 6) {
+    backgroundColour = [0, 178, 169, overlayAlpha]
+  } else if (colourNum == 7) {
+    backgroundColour = [150, 50, 0, overlayAlpha]
+  }
 }
 
 function colour(index) {
