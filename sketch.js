@@ -2,29 +2,40 @@ let serial;
 let portnName = '/dev/tty.usbmodem145401'
 let inData;
 
-
 var canvas; // pointer to the canvas.
+
+// ml5.js handpose technique.
+let handpose;
+let video;
+var arrayHand = new Array();
+
+
+// Interactive agents.
 var agents = [];
 var agentCount = 4000;
 var noiseScale = 100;
 var noiseStrength = 10;
 var noiseZRange = 0.4;
-var noiseZVelocity = 0.01;
+var noiseZVelocity = 0.1;
 var overlayAlpha = 10;
 var strokeWidth = 0.3;
 var drawMode = 1;
 
+// Colours.
 var secondColourNum= 1;
 var colourNum = 2;
 
-var colPic; 
-
+// Buttons.
 var buttonActivated;
+var ready = false;
 
 function setup() {
+  // serial communication.
   serial = new p5.SerialPort('192.168.0.4')
   serial.on('data', serialEvent);
   serial.open(portnName);
+  
+  handleHandpose();
 
   canvas = createCanvas(windowWidth / 1.5, windowHeight / 1.2);
   canvas.class("sketchStyle")
@@ -63,7 +74,7 @@ function serialEvent() {
       if (buttonActivated == 1) {
         if ((potentiometer > agentCount) || (potentiometer < agentCount)) {
           agents.length = 0; // empty array.
-          agentCount = scalex(potentiometer, 0, 255, 1, 8000);
+          agentCount = scalex(potentiometer, 0, 255, 1, 2000);
           initialiseAgents();
         }
       }
@@ -91,19 +102,30 @@ function serialEvent() {
 }
 
 function draw() {
-  fill(0, overlayAlpha);
-  noStroke();
-  rect(0, 0, width, height);
+  if (ready) {
 
-  for (var i = 0; i < agentCount; i++) {
-    colour(i); // colour the lines.
-
-    if (drawMode == 1) {
-      agents[i].modeOne(strokeWidth, noiseScale, noiseStrength, noiseZVelocity);
-    } else {
-      agents[i].modeTwo(strokeWidth, noiseScale, noiseStrength, noiseZVelocity);
+    if(arrayHand.length > 10) {
+      saveCanvas('myCanvas', 'jpg');
+      arrayHand = [];
     }
+
+    fill(0, overlayAlpha);
+    noStroke();
+    rect(0, 0, width, height);
+  
+    for (var i = 0; i < agentCount; i++) {
+      colour(i); // colour the lines.
+  
+      if (drawMode == 1) {
+        agents[i].modeOne(strokeWidth, noiseScale, noiseStrength, noiseZVelocity);
+      } else {
+        agents[i].modeTwo(strokeWidth, noiseScale, noiseStrength, noiseZVelocity);
+      }
+    }
+  } else {
+    text("loading model..")
   }
+  
 
 }
 
@@ -139,6 +161,9 @@ function dehoverOthers() {
   document.getElementById("button5").style.background = '#ffffff';
 }
 
+/**
+ * Deactivate options.
+ */
 function deactivateOptions() {
   document.getElementById("button1").style.borderColor = "black";
   document.getElementById("button2").style.borderColor = "black";
@@ -183,4 +208,25 @@ function colour(index) {
   } else if (secondColourNum == 3 && (index % 10 == 0)) {
     stroke(10, 10, 255)
   }
+}
+
+function handleHandpose() {
+  video = createCapture(VIDEO); // create a new video, used to capture the hand.
+  video.size(width, height); 
+  video.hide();
+
+  handpose = ml5.handpose(video, modelReady); // use the handpose model.
+
+  handpose.on("hand", results => {
+    if (results.length > 0 ) {
+      arrayHand.push(true);
+    } else {
+      arrayHand = [];
+    }
+  });
+}
+
+function modelReady() {
+  console.log("Model ready!");
+  ready = true;
 }
