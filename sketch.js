@@ -10,14 +10,14 @@ var agentCount = 100;
 var noiseScale = 100; //TODO
 var noiseStrength = 0;
 var noiseZRange = 0.4;
-var overlayAlpha = 1000; // TODO
+var overlayAlpha = 100; // TODO
 var strokeWidth = 0.3;
 var drawMode = 1;
 
 // Colours.
 var secondColourNum = 0;
 var colourNum = 0;
-var backgroundColour = [20, 20, 20, overlayAlpha]
+var backgroundColour = [20, 20, 20]
 
 // Buttons.
 var buttonActivated;
@@ -78,6 +78,7 @@ function serialEvent() {
 }
 
 function draw() {
+  backgroundColour.push(overlayAlpha);
   fill(backgroundColour);
   noStroke();
   rect(0, 0, width, height);
@@ -113,8 +114,12 @@ function goBackButton() {
   buttonActivated = null;
   deactivateOptions("button");
   deactivateOptions("colour");
+  dehoverOthers("colour");
 }
 
+/**
+ * 
+ */
 function joyButtonPressed() {
   if (joy_pressed == 1) {
     // if button activated is 4 then set the primary colour as the one selected.
@@ -139,7 +144,7 @@ function joyButtonPressed() {
         goBackButton();
       } else {
         updateBackgroundColour(joy_colour);
-        activateOption("colour", colourNum);
+        activateOption("colour", joy_colour);
       }
     }
     // otherwise it means that we are in the options menu (not colours), therefore change the options.
@@ -150,6 +155,9 @@ function joyButtonPressed() {
   }
 }
 
+/**
+ * 
+ */
 function controlOptions() {
   // NUMBER AGENTS.
   if (buttonActivated == 1) {
@@ -175,6 +183,11 @@ function controlOptions() {
   else if (buttonActivated == 6) {
     noiseScale = scalex(potentiometer, 0, 255, 1, 5000);
     console.log(noiseScale);
+  } 
+  else if (buttonActivated == 8) {
+    console.log("mesa")
+    overlayAlpha = scalex(potentiometer, 0, 255, 1, 1000);
+    console.log(overlayAlpha)
   }
 }
 
@@ -196,7 +209,7 @@ function hovering(stringIn, numberButton) {
  */
 function dehoverOthers(stringIn) {
   if (stringIn == "button") {
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 8; i++) {
       document.getElementById(stringIn + i).style.background = '#ffffff';
     }
   } else {
@@ -217,6 +230,8 @@ function deactivateOptions(stringIn) {
   if (stringIn == 'colour') {
     document.getElementById(stringIn + "-1").style.borderColor = "black";
     document.getElementById(stringIn + "0").style.borderColor = "black";
+  } else {
+    document.getElementById(stringIn + "8").style.borderColor = "black";
   }
 }
 
@@ -248,21 +263,21 @@ function scalex(number, inMin, inMax, outMin, outMax) {
 function updateBackgroundColour(colourNum) {
   // background colour.
   if (colourNum == 0) {
-    backgroundColour = [255, 255, 255, overlayAlpha]
+    backgroundColour = [255, 255, 255]
   } else if (colourNum == 1) {
-    backgroundColour = [255, 0, 0, overlayAlpha]
+    backgroundColour = [255, 0, 0]
   } else if (colourNum == 2) {
-    backgroundColour = [0, 255, 0, overlayAlpha]
+    backgroundColour = [0, 255, 0]
   } else if (colourNum == 3) {
-    backgroundColour = [0, 0, 255, overlayAlpha]
+    backgroundColour = [0, 0, 255]
   } else if (colourNum == 4) {
-    backgroundColour = [255, 20, 147, overlayAlpha]
+    backgroundColour = [255, 20, 147]
   } else if (colourNum == 5) {
-    backgroundColour = [0, 0, 0, overlayAlpha]
+    backgroundColour = [0, 0, 0]
   } else if (colourNum == 6) {
-    backgroundColour = [0, 178, 169, overlayAlpha]
+    backgroundColour = [0, 178, 169]
   } else if (colourNum == 7) {
-    backgroundColour = [150, 50, 0, overlayAlpha]
+    backgroundColour = [150, 50, 0]
   }
 }
 

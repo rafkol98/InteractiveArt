@@ -85,7 +85,7 @@ void lightUpLeds(int numberLed) {
  */
 void useJoystick() {
   int xValue = analogRead(XPIN);   
-  int mappedX = map(xValue, 0, 1023, 1, 8);
+  int mappedX = map(xValue, 0, 1023, 1, 9);
   int mappedXColours = map(xValue, 0, 1023, -1, 8);
   
   int bValue = digitalRead(BPIN);
