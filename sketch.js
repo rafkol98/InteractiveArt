@@ -7,10 +7,12 @@ var canvas; // pointer to the canvas.
 // Interactive agents.
 var agents = [];
 var agentCount = 100;
-var noiseScale = 100; //TODO
+var agentMaxVelocity = 5;
+
+var noiseScale = 100; 
 var noiseStrength = 0;
 var noiseZRange = 0.4;
-var overlayAlpha = 100; // TODO
+var overlayAlpha = 100; 
 var strokeWidth = 0.3;
 var drawMode = 1;
 
@@ -26,8 +28,9 @@ var ready = false;
 // Serial controls.
 var potentiometer, ultrasound, joy_x, joy_colour, joy_pressed;
 
-// Screenshot using ultrasound sensor.
-var arrayScreenshot = new Array();
+// Ultrasound sensor.
+var arrayScreenshot = new Array();  // Screenshot using ultrasound sensor.
+var direction = 1;
 
 function setup() {
   // serial communication.
@@ -97,7 +100,15 @@ function draw() {
     if (drawMode == 1) {
       agents[i].modeOne(strokeWidth, noiseScale, noiseStrength);
     } else {
-      agents[i].modeTwo(strokeWidth, noiseScale, noiseStrength);
+      // control direction.
+      if (direction == 4) {
+        direction = 1; // reset direction.
+      } else {
+        if (i % 100 == 0) {
+          direction++;
+        }
+      }
+      agents[i].modeTwo(strokeWidth, noiseScale, noiseStrength, direction);
     }
   }
 }
@@ -107,7 +118,7 @@ function draw() {
  */
 function initialiseAgents() {
   for (var i = 0; i < agentCount; i++) {
-    agents[i] = new Agent(noiseZRange);
+    agents[i] = new Agent(noiseZRange, agentMaxVelocity);
   }
 }
 
@@ -188,6 +199,7 @@ function controlOptions() {
     noiseScale = scalex(potentiometer, 0, 255, 1, 5000);
     console.log(noiseScale);
   }
+  // ALPHA CHANNEL.
   else if (buttonActivated == 8) {
     overlayAlpha = scalex(potentiometer, 0, 255, 1, 200);
     console.log(overlayAlpha)
