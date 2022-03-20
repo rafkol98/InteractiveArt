@@ -10,13 +10,13 @@ var Agent = function (noiseZRange, maxVelocity) {
 };
 
 // Update agents appearance - make them move given width.
-Agent.prototype.update = function (strokeWidth, left, up) {
+Agent.prototype.update = function (agentWidth, left, up) {
   this.moveHorizontally(left)
   this.moveVertically(up)
 
   this.endLessMovement(); // create endless movements of the agents.
 
-  strokeWeight(strokeWidth * this.stepSize);
+  strokeWeight(agentWidth * this.stepSize);
   line(this.vectorOld.x, this.vectorOld.y, this.vector.x, this.vector.y); // create a new line.
 
   this.vectorOld = this.vector.copy(); // create old vectors copy.
@@ -67,19 +67,19 @@ Agent.prototype.moveVertically = function(up) {
 }
 
 // First mode drawing.
-Agent.prototype.modeOne = function (strokeWidth, noiseScale, noiseStrength) {
+Agent.prototype.modeOne = function (agentWidth, noiseScale, noiseStrength) {
   this.angle = noise(this.vector.x / noiseScale, this.vector.y / noiseScale, this.noiseZ) * noiseStrength;
-  this.update(strokeWidth, this.left, this.up);
+  this.update(agentWidth, this.left, this.up);
 };
 
 // Second mode drawing.
-Agent.prototype.modeTwo = function (strokeWidth, noiseScale, noiseStrength, direction) {
+Agent.prototype.modeTwo = function (agentWidth, noiseScale, noiseStrength, direction) {
   this.angle = noise(this.vector.x / noiseScale, this.vector.y / noiseScale, this.noiseZ) * noiseStrength;
   if (direction == 1) {
-    this.update(strokeWidth, !this.left, this.up);
+    this.update(agentWidth, !this.left, this.up);
   } else if (direction == 2) {
-    this.update(strokeWidth, this.left, !this.up);
+    this.update(agentWidth, this.left, !this.up);
   } else {
-    this.update(strokeWidth, !this.left, !this.up);
+    this.update(agentWidth, !this.left, !this.up);
   }
 };

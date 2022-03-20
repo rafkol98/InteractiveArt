@@ -13,7 +13,7 @@ var noiseScale = 100;
 var noiseStrength = 0;
 var noiseZRange = 0.4;
 var overlayAlpha = 100; 
-var strokeWidth = 0.3;
+var agentWidth = 0.3;
 var drawMode = 1;
 
 // Colours.
@@ -65,8 +65,8 @@ function serialEvent() {
 
       console.log(joy_x);
 
-      // hover the options, except if button activated is 4, 5 or 7.
-      if (buttonActivated != 4 && buttonActivated != 5 && buttonActivated != 7) {
+      // hover the options, except if button activated is 6, 7 or 8 (the colour buttons).
+      if (buttonActivated != 6 && buttonActivated != 7 && buttonActivated != 8) {
         hovering("button", joy_x);
       }
       // hover the colours.
@@ -101,7 +101,7 @@ function draw() {
     colour(i); // colour the lines.
 
     if (drawMode == 1) {
-      agents[i].modeOne(strokeWidth, noiseScale, noiseStrength);
+      agents[i].modeOne(agentWidth, noiseScale, noiseStrength);
     } else {
       // control direction.
       if (direction == 4) {
@@ -111,7 +111,7 @@ function draw() {
           direction++;
         }
       }
-      agents[i].modeTwo(strokeWidth, noiseScale, noiseStrength, direction);
+      agents[i].modeTwo(agentWidth, noiseScale, noiseStrength, direction);
     }
   }
 }
@@ -144,8 +144,8 @@ function joyButtonPressed() {
   if (joy_pressed == 1) {
     $('#instructionsModal').modal('hide');
     
-    // if button activated is 4 then set the primary colour as the one selected.
-    if (buttonActivated == 4) {
+    // if button activated is 6 then set the primary colour as the one selected.
+    if (buttonActivated == 6) {
       if (joy_colour == -1) {
         goBackButton();
       } else {
@@ -153,15 +153,17 @@ function joyButtonPressed() {
         activateOption("colour", colourNum);
       }
     }
-    // if button activated is 5 then set the secondary colour as the one selected.
-    else if (buttonActivated == 5) {
+    // if button activated is 7 then set the secondary colour as the one selected.
+    else if (buttonActivated == 7) {
       if (joy_colour == -1) {
         goBackButton();
       } else {
         secondColourNum = joy_colour;
         activateOption("colour", colourNum);
       }
-    } else if (buttonActivated == 7) {
+    } 
+    // if button activated is 8 then set then change the background colour.
+    else if (buttonActivated == 8) {
       if (joy_colour == -1) {
         goBackButton();
       } else {
@@ -193,23 +195,25 @@ function controlOptions() {
   else if (buttonActivated == 2) {
     noiseStrength = manualMap(potentiometer, 0, 1023, 1, 1000);
   }
-  // STROKE WIDTH.
+  // AGENTS WIDTH.
   else if (buttonActivated == 3) {
-    strokeWidth = manualMap(potentiometer, 0, 1023, 0.1, 2);
+    agentWidth = manualMap(potentiometer, 0, 1023, 0.1, 2);
   }
-  // AGENTS PRIMARY COLOUR.
-  else if (buttonActivated == 4 || buttonActivated == 5 || buttonActivated == 7) {
-    serial.write("colour*" + joy_colour + ";");
-  }
+ 
   // NOISE SCALE.
-  else if (buttonActivated == 6) {
+  else if (buttonActivated == 4) {
     noiseScale = manualMap(potentiometer, 0, 1023, 1, 5000);
     console.log(noiseScale);
   }
   // ALPHA CHANNEL.
-  else if (buttonActivated == 8) {
+  else if (buttonActivated == 5) {
     overlayAlpha = manualMap(potentiometer, 0, 1023, 1, 200);
     console.log(overlayAlpha)
+  }
+
+   // AGENTS PRIMARY COLOUR.
+   else if (buttonActivated == 6 || buttonActivated == 7 || buttonActivated == 8) {
+    serial.write("colour*" + joy_colour + ";");
   }
 }
 
