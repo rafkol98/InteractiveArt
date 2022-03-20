@@ -111,18 +111,21 @@ void usePotentiometer() {
  * Calculate distance from sensor using ultrasonic sound.
  */
 void calculateDistance() {
-  // Clears the trigPin condition
+  // Clears the trigPin condition.
   digitalWrite(TRIGPIN, LOW);
   delayMicroseconds(2);
 
-  digitalWrite(TRIGPIN, HIGH);   // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
+  // Sets the trigPin HIGH for 10 microseconds.
+  digitalWrite(TRIGPIN, HIGH);  
   delayMicroseconds(10);
   digitalWrite(TRIGPIN, LOW);
-  
-  duration = pulseIn(ECHOPIN, HIGH); // read echopin and return sound wave travel time in seconds
-  distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
 
-  Serial.print(distance);  // Print the distance to serial.
+  // read ECHO and return sound wave travel time in seconds. This is used to calculate distance.
+  duration = pulseIn(ECHOPIN, HIGH); 
+  distance = duration * 0.034 / 2;
+
+  // Print the distance to serial.
+  Serial.print(distance);  
   Serial.print(";");  
 }
 

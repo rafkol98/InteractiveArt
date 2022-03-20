@@ -1,5 +1,5 @@
 let serial;
-let portnName = '/dev/tty.usbmodem146401'
+let portnName = '/dev/tty.usbmodem144401'
 let inData;
 
 var canvas; // pointer to the canvas.
@@ -26,7 +26,7 @@ var buttonActivated;
 var ready = false;
 
 // Serial controls.
-var potentiometer, ultrasound, joy_x, joy_colour, joy_pressed;
+var potentiometer, ultrasound, joy_x,  joy_colour, joy_pressed;
 
 // Ultrasound sensor.
 var arrayScreenshot = new Array();  // Screenshot using ultrasound sensor.
@@ -35,7 +35,7 @@ var direction = 1;
 
 function setup() {
   // serial communication.
-  serial = new p5.SerialPort('192.168.0.4')
+  serial = new p5.SerialPort('138.251.198.84')
   serial.on('data', serialEvent);
   serial.open(portnName);
 
@@ -224,11 +224,13 @@ function controlUltrasound() {
   // Change draw mode.
   ultrasound <= 20 ? drawMode = 2 : drawMode = 1;
 
+  console.log(ultrasound);
   // If ultrasound reading is 1185 it means that the user is touching the sensor.
   // If they do that then populate an array which will be used to save canvas - screenshot
   // when it has more than 15 elements i.e. when the user has been holding their hand there for ~1 second.
-  if (ultrasound == 1185) {
+  if (ultrasound > 1180) {
     arrayScreenshot.push(true);
+    console.log("mesa")
   } else {
     arrayScreenshot = [];
   }
@@ -292,7 +294,7 @@ function activateOption(stringIn, numberButton) {
 }
 
 /**
- * Manual implementation of scale - map function. maps a range of values to another.
+ * Manual implementation of scale - map function. Maps a range of values to another.
  * @param {*} number 
  * @param {*} inMin 
  * @param {*} inMax 
