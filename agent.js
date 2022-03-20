@@ -23,7 +23,7 @@ Agent.prototype.update = function (strokeWidth, left, up) {
 };
 
 Agent.prototype.endLessMovement = function() {
-  // Make them move (and generate) endlessly.
+  // Make them move endlessly.
   if (this.vector.x < -10) {
     this.vector.x = this.vectorOld.x = width + 10;
   }

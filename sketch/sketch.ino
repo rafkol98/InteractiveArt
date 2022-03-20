@@ -34,7 +34,7 @@ void setup() {
 
 void loop() {
   checkSerial();
-  potentiometer();
+  usePotentiometer();
   calculateDistance();
   useJoystick();
   
@@ -82,11 +82,14 @@ void lightUpLeds(int numberLed) {
  * Use the joystick.
  */
 void useJoystick() {
-  int xValue = analogRead(XPIN);   
-  int mappedX = map(xValue, 0, 1023, 1, 9);
-  int mappedXColours = map(xValue, 0, 1023, -1, 8);
+  int xValue = analogRead(XPIN); // read analogue value.
+   
+  int mappedX = map(xValue, 0, 1023, 1, 9); // map from 1 to 9 - used for navigation options.
+  int mappedXColours = map(xValue, 0, 1023, -1, 8); // map from -1 to 8 - used for navigating colours. -1 is for back button.
   
-  int bValue = digitalRead(BPIN);
+  int bValue = digitalRead(BPIN); // read whether button was pressed in.
+
+  // Print to serial.
   Serial.print(mappedX);
   Serial.print(";");
   Serial.print(mappedXColours);
@@ -95,13 +98,12 @@ void useJoystick() {
 }
 
 /**
- * Use the potentiometer and map values read from 0 to 255.
+ * Get potentiometer's values and print them to the serial communication.
  */
-void potentiometer() {
-  int ardRead = analogRead(A0);
-  int mappedVal = map(ardRead, 0, 1023, 0, 255);
+void usePotentiometer() {
+  int ardRead = analogRead(A0); // read analogue input.
   
-  Serial.print(mappedVal);  // Print the potentiometer value to serial.
+  Serial.print(ardRead);  // Print the usePotentiometer value to serial.
   Serial.print(";");  
 }
 

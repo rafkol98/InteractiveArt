@@ -1,5 +1,5 @@
 let serial;
-let portnName = '/dev/tty.usbmodem144301'
+let portnName = '/dev/tty.usbmodem146401'
 let inData;
 
 var canvas; // pointer to the canvas.
@@ -62,6 +62,8 @@ function serialEvent() {
       joy_x = sensors[2];
       joy_colour = sensors[3];
       joy_pressed = sensors[4];
+
+      console.log(joy_x);
 
       // hover the options, except if button activated is 4, 5 or 7.
       if (buttonActivated != 4 && buttonActivated != 5 && buttonActivated != 7) {
@@ -183,17 +185,17 @@ function controlOptions() {
   if (buttonActivated == 1) {
     if ((potentiometer > agentCount) || (potentiometer < agentCount)) {
       agents.length = 0; // empty array.
-      agentCount = scalex(potentiometer, 0, 255, 1, 2000);
+      agentCount = manualMap(potentiometer, 0, 1023, 1, 2000);
       initialiseAgents();
     }
   }
   // NOISE STRENGTH.
   else if (buttonActivated == 2) {
-    noiseStrength = scalex(potentiometer, 0, 255, 1, 1000);
+    noiseStrength = manualMap(potentiometer, 0, 1023, 1, 1000);
   }
   // STROKE WIDTH.
   else if (buttonActivated == 3) {
-    strokeWidth = scalex(potentiometer, 0, 255, 0.1, 2);
+    strokeWidth = manualMap(potentiometer, 0, 1023, 0.1, 2);
   }
   // AGENTS PRIMARY COLOUR.
   else if (buttonActivated == 4 || buttonActivated == 5 || buttonActivated == 7) {
@@ -201,12 +203,12 @@ function controlOptions() {
   }
   // NOISE SCALE.
   else if (buttonActivated == 6) {
-    noiseScale = scalex(potentiometer, 0, 255, 1, 5000);
+    noiseScale = manualMap(potentiometer, 0, 1023, 1, 5000);
     console.log(noiseScale);
   }
   // ALPHA CHANNEL.
   else if (buttonActivated == 8) {
-    overlayAlpha = scalex(potentiometer, 0, 255, 1, 200);
+    overlayAlpha = manualMap(potentiometer, 0, 1023, 1, 200);
     console.log(overlayAlpha)
   }
 }
@@ -293,7 +295,7 @@ function activateOption(stringIn, numberButton) {
  * @param {*} outMin 
  * @param {*} outMax 
  */
-function scalex(number, inMin, inMax, outMin, outMax) {
+function manualMap(number, inMin, inMax, outMin, outMax) {
   return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
