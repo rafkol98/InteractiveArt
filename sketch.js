@@ -1,5 +1,5 @@
 let serial;
-let portnName = '/dev/tty.usbmodem145401'
+let portnName = '/dev/tty.usbmodem144301'
 let inData;
 
 var canvas; // pointer to the canvas.
@@ -31,6 +31,7 @@ var potentiometer, ultrasound, joy_x, joy_colour, joy_pressed;
 // Ultrasound sensor.
 var arrayScreenshot = new Array();  // Screenshot using ultrasound sensor.
 var direction = 1;
+
 
 function setup() {
   // serial communication.
@@ -136,7 +137,11 @@ function goBackButton() {
  * 
  */
 function joyButtonPressed() {
+
+
   if (joy_pressed == 1) {
+    $('#instructionsModal').modal('hide');
+    
     // if button activated is 4 then set the primary colour as the one selected.
     if (buttonActivated == 4) {
       if (joy_colour == -1) {

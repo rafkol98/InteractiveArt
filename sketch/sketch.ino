@@ -1,9 +1,11 @@
 #include <Adafruit_NeoPixel.h>
+// pins for joystick. Only use X as we just want to change between different options.
+const int XPIN = A5;
+const int BPIN = 9;
 
-// pins for Ultrasoound.
+// pins and variables for Ultrasound sensor.
 const int ECHOPIN = 2;
 const int TRIGPIN = 3;
-
 // variables for measuring distance using ultrasonic sensor.
 long duration;
 int distance; 
@@ -12,13 +14,9 @@ int distance;
 const int LEDPIN = 6;
 const int NUMPIXELS = 8; // number of pixels in the adafruit LED.
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDPIN, NEO_GRB + NEO_KHZ800);
-
 // variable for default colours of agents.
 int colourSelected = 0;
 
-// pins for joystick. Only use X as we just want to change between different options.
-const int XPIN = A5;
-const int BPIN = 9;
 
 void setup() {
   // put your setup code here, to run once:
@@ -29,8 +27,8 @@ void setup() {
   pinMode(TRIGPIN, OUTPUT); // Sets the trigPin as an OUTPUT
   pinMode(ECHOPIN, INPUT); // Sets the echoPin as an INPUT
 
-  pinMode(9,INPUT); 
-  digitalWrite(9,HIGH); 
+  pinMode(BPIN,INPUT); 
+  digitalWrite(BPIN,HIGH); 
   turnOffLeds(); // turn off ALL leds.
 }
 
