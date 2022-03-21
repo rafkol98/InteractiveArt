@@ -20,8 +20,8 @@ var Agent = function (maxNoiseRange, maxVelocity) {
  * @param up - boolean flag whether the agent is moving upwards.
  */
 Agent.prototype.update = function (agentWidth, angle, left, up) {
-  this.moveHorizontally(left) // move the agent horizontally.
-  this.moveVertically(up) // move the agent vertically.
+  this.moveHorizontally(left, angle) // move the agent horizontally.
+  this.moveVertically(up, angle) // move the agent vertically.
 
   this.endLessMovement(); // create endless movements of the agents.
 
@@ -108,7 +108,6 @@ Agent.prototype.normal = function (agentWidth, noiseScale, noiseStrength) {
 Agent.prototype.ultrasonicControl = function (agentWidth, noiseScale, noiseStrength, direction) {
   angle = noise(this.agentVector.x / noiseScale, this.agentVector.y / noiseScale, this.noiseZ) * noiseStrength;
   // change direction when ultrasonic control.
-  console.log("direction"+direction)
   if (direction == 1) {
     this.update(agentWidth, angle, !this.left, this.up);
   } else if (direction == 2) {

@@ -1,7 +1,7 @@
 // AUTHOR: 210017984
 //Serial communication.
 let serial;
-let portnName = '/dev/tty.usbmodem146301'
+let portnName = '/dev/tty.usbmodem146401'
 let inData;
 
 var canvas; // pointer to the canvas.
@@ -13,9 +13,9 @@ var agentMaxVelocity = 5;
 
 // Initialise variables used for the agents.
 var agentCount = 100;
-var noiseScale = 100; 
+var noiseScale = 100;
 var noiseStrength = 0;
-var alphaChannel = 100; 
+var alphaChannel = 100;
 var agentWidth = 0.3;
 var movementMode = 1;
 
@@ -74,13 +74,13 @@ function draw() {
     // if movementMode is 1 then move the agent normally.
     if (movementMode == 1) {
       agents[i].normal(agentWidth, noiseScale, noiseStrength);
-    } 
+    }
     // Otherwise use the ultrasonic control to reverse their motion.
     else {
       // control direction.
       if (direction == 4) {
         direction = 1; // reset direction.
-      } 
+      }
       else {
         // update direction every 100 agents iterated (so that it does not change immediately back to where it was).
         if (i % 100 == 0) {
@@ -110,8 +110,6 @@ function serialEvent() {
       joy_x = sensors[2];
       joy_colour = sensors[3];
       joy_pressed = sensors[4];
-
-      console.log(joy_x);
 
       // hover the options, except if button activated is 6, 7 or 8 (the colour buttons).
       if (buttonActivated != 6 && buttonActivated != 7 && buttonActivated != 8) {
@@ -150,7 +148,7 @@ function joyButtonPressed() {
 
   if (joy_pressed == 1) {
     $('#instructionsModal').modal('hide'); // hide instructions modal if beginnings.
-    
+
     // if button activated is 6 then set the primary colour as the one selected.
     if (buttonActivated == 6) {
       if (joy_colour == -1) {
@@ -168,7 +166,7 @@ function joyButtonPressed() {
         secondColourNum = joy_colour;
         activateOption("colour", colourNum);
       }
-    } 
+    }
     // if button activated is 8 then set then change the background colour.
     else if (buttonActivated == 8) {
       if (joy_colour == -1) {
@@ -191,31 +189,35 @@ function joyButtonPressed() {
  */
 function controlOptions() {
   // Act appropriately depending on the button activated.
-  switch(buttonActivated) {
-    case 1:
-      if ((potentiometer > agentCount) || (potentiometer < agentCount)) {
-        agents.length = 0; // empty array.
-        agentCount = manualMap(potentiometer, 0, 1023, 1, 2000);
-        initialiseAgents();
-      }
-      break;
-    case 2:
-      noiseStrength = manualMap(potentiometer, 0, 1023, 1, 1000);
-      break;
-    case 3:
-      agentWidth = manualMap(potentiometer, 0, 1023, 0.1, 2);
-      break;
-    case 4:
-      noiseScale = manualMap(potentiometer, 0, 1023, 1, 5000);
-      break;
-    case 5:
-      alphaChannel = manualMap(potentiometer, 0, 1023, 1, 200);
-      break;
-    case 6:
-    case 7:
-    case 8:
-      serial.write("colour*" + joy_colour + ";"); // write colour to serial to control LED strip.
-      break;
+  // NUMBER AGENTS.
+  if (buttonActivated == 1) {
+    if ((potentiometer > agentCount) || (potentiometer < agentCount)) {
+      agents.length = 0; // empty array.
+      agentCount = manualMap(potentiometer, 0, 1023, 1, 2000);
+      initialiseAgents();
+    }
+  }
+  // NOISE STRENGTH.
+  else if (buttonActivated == 2) {
+    noiseStrength = manualMap(potentiometer, 0, 1023, 1, 1000);
+  }
+  // AGENTS WIDTH.
+  else if (buttonActivated == 3) {
+    agentWidth = manualMap(potentiometer, 0, 1023, 0.1, 2);
+  }
+
+  // NOISE SCALE.
+  else if (buttonActivated == 4) {
+    noiseScale = manualMap(potentiometer, 0, 1023, 1, 5000);
+  }
+  // ALPHA CHANNEL.
+  else if (buttonActivated == 5) {
+    alphaChannel = manualMap(potentiometer, 0, 1023, 1, 200);
+  }
+
+  // AGENTS PRIMARY COLOUR.
+  else if (buttonActivated == 6 || buttonActivated == 7 || buttonActivated == 8) {
+    serial.write("colour*" + joy_colour + ";");
   }
 }
 
@@ -306,31 +308,22 @@ function manualMap(number, inMin, inMax, outMin, outMax) {
  */
 function updateBackgroundColour(colourNum) {
   // Change background colour.
-  switch(colourNum) {
-    case 0:
-      backgroundColour = [255, 255, 255] // white 
-      break;
-    case 1:
-      backgroundColour = [255, 0, 0] // red
-      break;
-    case 2:
-      backgroundColour = [0, 255, 0] // green
-      break;
-    case 3:
-      backgroundColour = [0, 0, 255] // blue
-      break;
-    case 4:
-      backgroundColour = [255, 20, 147] // pink
-      break;
-    case 5:
-      backgroundColour = [0, 0, 0] // black
-      break;
-    case 6:
-      backgroundColour = [0, 178, 169] // teal
-      break;
-    case 7:
-      backgroundColour = [150, 50, 0] // orange
-      break;
+  if (colourNum == 0) {
+    backgroundColour = [255, 255, 255] // white.
+  } else if (colourNum == 1) {
+    backgroundColour = [255, 0, 0] // red.
+  } else if (colourNum == 2) {
+    backgroundColour = [0, 255, 0] // green.
+  } else if (colourNum == 3) {
+    backgroundColour = [0, 0, 255] // blue.
+  } else if (colourNum == 4) {
+    backgroundColour = [255, 20, 147] // pink.
+  } else if (colourNum == 5) {
+    backgroundColour = [0, 0, 0] // black.
+  } else if (colourNum == 6) {
+    backgroundColour = [0, 178, 169] // teal.
+  } else if (colourNum == 7) {
+    backgroundColour = [150, 50, 0] // orange.
   }
 }
 
@@ -338,23 +331,43 @@ function updateBackgroundColour(colourNum) {
  * Colour agent - both primary and secondary colour.
  */
 function colour(index) {
-  if (colourNum == 0 || (secondColourNum == 0 && (index % 10 == 0))) {
-    stroke(255, 255, 255) // white
-  } else if (colourNum == 1 || (secondColourNum == 1 && (index % 10 == 0))) {
-    stroke(255, 0, 0) // red
-  } else if (colourNum == 2 || (secondColourNum == 2 && (index % 10 == 0))) {
-    stroke(0, 255, 0) // green
-  } else if (colourNum == 3 || (secondColourNum == 3 && (index % 10 == 0))) {
-    stroke(0, 0, 255) // blue
-  } else if (colourNum == 4 || (secondColourNum == 4 && (index % 10 == 0))) {
-    stroke(255, 20, 147) // pink
-  } else if (colourNum == 5 || (secondColourNum == 5 && (index % 10 == 0))) {
-    stroke(0, 0, 0) // black
-  } else if (colourNum == 6 || (secondColourNum == 6 && (index % 10 == 0))) {
-    stroke(0, 178, 169) // teal
-  } else if (colourNum == 7 || (secondColourNum == 7 && (index % 10 == 0))) {
-    stroke(150, 50, 0) // orange
-  }
+    // primary colour.
+    if (colourNum == 0) {
+      stroke(255, 255, 255) // white.
+    } else if (colourNum == 1) {
+      stroke(255, 0, 0) // red.
+    } else if (colourNum == 2) {
+      stroke(0, 255, 0) // green.
+    } else if (colourNum == 3) {
+      stroke(0, 0, 255) // blue.
+    } else if (colourNum == 4) {
+      stroke(255, 20, 147) // pink.
+    } else if (colourNum == 5) {
+      stroke(0, 0, 0) // black.
+    } else if (colourNum == 6) {
+      stroke(0, 178, 169) // teal.
+    } else if (colourNum == 7) {
+      stroke(150, 50, 0) // orange.
+    }
+  
+    // second colour.
+    if (secondColourNum == 0 && (index % 10 == 0)) {
+      stroke(255, 255, 255) // white.
+    } else if (secondColourNum == 1 && (index % 10 == 0)) {
+      stroke(255, 0, 0) // red.
+    } else if (secondColourNum == 2 && (index % 10 == 0)) {
+      stroke(0, 255, 0) // green.
+    } else if (secondColourNum == 3 && (index % 10 == 0)) {
+      stroke(0, 0, 255) // blue.
+    } else if (secondColourNum == 4 && (index % 10 == 0)) {
+      stroke(255, 20, 147) // pink.
+    } else if (secondColourNum == 5 && (index % 10 == 0)) {
+      stroke(0, 0, 0) // black.
+    } else if (secondColourNum == 6 && (index % 10 == 0)) {
+      stroke(0, 178, 169) // teal.
+    } else if (secondColourNum == 7 && (index % 10 == 0)) {
+      stroke(150, 50, 0) // orange.
+    }
 }
 
 /**
