@@ -1,9 +1,10 @@
+// AUTHOR: 210017984
+//Serial communication.
 let serial;
 let portnName = '/dev/tty.usbmodem146301'
 let inData;
 
 var canvas; // pointer to the canvas.
-
 
 var agents = [];
 // Agent constructor
@@ -148,7 +149,7 @@ function initialiseAgents() {
 function joyButtonPressed() {
 
   if (joy_pressed == 1) {
-    $('#instructionsModal').modal('hide');
+    $('#instructionsModal').modal('hide'); // hide instructions modal if beginnings.
     
     // if button activated is 6 then set the primary colour as the one selected.
     if (buttonActivated == 6) {
@@ -189,50 +190,45 @@ function joyButtonPressed() {
  * Control the variables/options and change their values accordingly.
  */
 function controlOptions() {
-  // NUMBER AGENTS.
-  if (buttonActivated == 1) {
-    if ((potentiometer > agentCount) || (potentiometer < agentCount)) {
-      agents.length = 0; // empty array.
-      agentCount = manualMap(potentiometer, 0, 1023, 1, 2000);
-      initialiseAgents();
-    }
-  }
-  // NOISE STRENGTH.
-  else if (buttonActivated == 2) {
-    noiseStrength = manualMap(potentiometer, 0, 1023, 1, 1000);
-  }
-  // AGENTS WIDTH.
-  else if (buttonActivated == 3) {
-    agentWidth = manualMap(potentiometer, 0, 1023, 0.1, 2);
-  }
- 
-  // NOISE SCALE.
-  else if (buttonActivated == 4) {
-    noiseScale = manualMap(potentiometer, 0, 1023, 1, 5000);
-    console.log(noiseScale);
-  }
-  // ALPHA CHANNEL.
-  else if (buttonActivated == 5) {
-    alphaChannel = manualMap(potentiometer, 0, 1023, 1, 200);
-    console.log(alphaChannel)
-  }
-
-   // AGENTS PRIMARY COLOUR.
-   else if (buttonActivated == 6 || buttonActivated == 7 || buttonActivated == 8) {
-    serial.write("colour*" + joy_colour + ";");
+  // Act appropriately depending on the button activated.
+  switch(buttonActivated) {
+    case 1:
+      if ((potentiometer > agentCount) || (potentiometer < agentCount)) {
+        agents.length = 0; // empty array.
+        agentCount = manualMap(potentiometer, 0, 1023, 1, 2000);
+        initialiseAgents();
+      }
+      break;
+    case 2:
+      noiseStrength = manualMap(potentiometer, 0, 1023, 1, 1000);
+      break;
+    case 3:
+      agentWidth = manualMap(potentiometer, 0, 1023, 0.1, 2);
+      break;
+    case 4:
+      noiseScale = manualMap(potentiometer, 0, 1023, 1, 5000);
+      break;
+    case 5:
+      alphaChannel = manualMap(potentiometer, 0, 1023, 1, 200);
+      break;
+    case 6:
+    case 7:
+    case 8:
+      serial.write("colour*" + joy_colour + ";"); // write colour to serial to control LED strip.
+      break;
   }
 }
 
 /**
- * 
+ *  Control the ultrasound sensor.
  */
 function controlUltrasound() {
   // Change draw mode.
   ultrasound <= 20 ? movementMode = 2 : movementMode = 1;
 
-  // If ultrasound reading is 1185 it means that the user is touching the sensor.
+  // If ultrasound reading is greater than 1180 it means that the user is touching the sensor.
   // If they do that then populate an array which will be used to save canvas - screenshot
-  // when it has more than 15 elements i.e. when the user has been holding their hand there for ~1 second.
+  // when it has more than 5 elements i.e. when the user has been holding their hand there for ~1 second.
   if (ultrasound > 1180) {
     arrayScreenshot.push(true);
   } else {
@@ -241,7 +237,8 @@ function controlUltrasound() {
 }
 
 /**
- * Acts as a hovering button - gets activated when joystick is on an option.
+ * Acts as a hovering button - gets activated when joystick is on an option. Turns the background orange if variable option,
+ * if colour button just turn its border colour orange so that it is still distinguishable which colour it represents.
  */
 function hovering(stringIn, numberButton) {
   dehoverOthers(stringIn);
@@ -253,7 +250,8 @@ function hovering(stringIn, numberButton) {
 }
 
 /**
- * Dehover other options.
+ * Dehover other options making their background colour white if variable buttons. Otherwise if its 
+ * colour buttons, make their border colour black.
  */
 function dehoverOthers(stringIn) {
   if (stringIn == "button") {
@@ -302,64 +300,60 @@ function manualMap(number, inMin, inMax, outMin, outMax) {
   return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
+/**
+ * Update background colour - put the values in arrays so that you can combine it with
+ * the alpha channel in the background option.
+ */
 function updateBackgroundColour(colourNum) {
-  // background colour.
-  if (colourNum == 0) {
-    backgroundColour = [255, 255, 255]
-  } else if (colourNum == 1) {
-    backgroundColour = [255, 0, 0]
-  } else if (colourNum == 2) {
-    backgroundColour = [0, 255, 0]
-  } else if (colourNum == 3) {
-    backgroundColour = [0, 0, 255]
-  } else if (colourNum == 4) {
-    backgroundColour = [255, 20, 147]
-  } else if (colourNum == 5) {
-    backgroundColour = [0, 0, 0]
-  } else if (colourNum == 6) {
-    backgroundColour = [0, 178, 169]
-  } else if (colourNum == 7) {
-    backgroundColour = [150, 50, 0]
+  // Change background colour.
+  switch(colourNum) {
+    case 0:
+      backgroundColour = [255, 255, 255] // white 
+      break;
+    case 1:
+      backgroundColour = [255, 0, 0] // red
+      break;
+    case 2:
+      backgroundColour = [0, 255, 0] // green
+      break;
+    case 3:
+      backgroundColour = [0, 0, 255] // blue
+      break;
+    case 4:
+      backgroundColour = [255, 20, 147] // pink
+      break;
+    case 5:
+      backgroundColour = [0, 0, 0] // black
+      break;
+    case 6:
+      backgroundColour = [0, 178, 169] // teal
+      break;
+    case 7:
+      backgroundColour = [150, 50, 0] // orange
+      break;
   }
 }
 
+/**
+ * Colour agent - both primary and secondary colour.
+ */
 function colour(index) {
-  // primary colour.
-  if (colourNum == 0) {
-    stroke(255, 255, 255)
-  } else if (colourNum == 1) {
-    stroke(255, 0, 0)
-  } else if (colourNum == 2) {
-    stroke(0, 255, 0)
-  } else if (colourNum == 3) {
-    stroke(0, 0, 255)
-  } else if (colourNum == 4) {
-    stroke(255, 20, 147)
-  } else if (colourNum == 5) {
-    stroke(0, 0, 0)
-  } else if (colourNum == 6) {
-    stroke(0, 178, 169)
-  } else if (colourNum == 7) {
-    stroke(150, 50, 0)
-  }
-
-  // second colour.
-  if (secondColourNum == 0 && (index % 10 == 0)) {
-    stroke(255, 255, 255)
-  } else if (secondColourNum == 1 && (index % 10 == 0)) {
-    stroke(255, 0, 0)
-  } else if (secondColourNum == 2 && (index % 10 == 0)) {
-    stroke(0, 255, 0)
-  } else if (secondColourNum == 3 && (index % 10 == 0)) {
-    stroke(0, 0, 255)
-  } else if (secondColourNum == 4 && (index % 10 == 0)) {
-    stroke(255, 20, 147)
-  } else if (secondColourNum == 5 && (index % 10 == 0)) {
-    stroke(0, 0, 0)
-  } else if (secondColourNum == 6 && (index % 10 == 0)) {
-    stroke(0, 178, 169)
-  } else if (secondColourNum == 7 && (index % 10 == 0)) {
-    stroke(150, 50, 0)
+  if (colourNum == 0 || (secondColourNum == 0 && (index % 10 == 0))) {
+    stroke(255, 255, 255) // white
+  } else if (colourNum == 1 || (secondColourNum == 1 && (index % 10 == 0))) {
+    stroke(255, 0, 0) // red
+  } else if (colourNum == 2 || (secondColourNum == 2 && (index % 10 == 0))) {
+    stroke(0, 255, 0) // green
+  } else if (colourNum == 3 || (secondColourNum == 3 && (index % 10 == 0))) {
+    stroke(0, 0, 255) // blue
+  } else if (colourNum == 4 || (secondColourNum == 4 && (index % 10 == 0))) {
+    stroke(255, 20, 147) // pink
+  } else if (colourNum == 5 || (secondColourNum == 5 && (index % 10 == 0))) {
+    stroke(0, 0, 0) // black
+  } else if (colourNum == 6 || (secondColourNum == 6 && (index % 10 == 0))) {
+    stroke(0, 178, 169) // teal
+  } else if (colourNum == 7 || (secondColourNum == 7 && (index % 10 == 0))) {
+    stroke(150, 50, 0) // orange
   }
 }
 

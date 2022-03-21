@@ -1,3 +1,4 @@
+// AUTHOR: 210017984
 #include <Adafruit_NeoPixel.h>
 // pins for joystick. Only use X as we just want to change between different options.
 const int XPIN = A5;
@@ -17,7 +18,9 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDPIN, NEO_GRB + NEO_KH
 // variable for default colours of agents.
 int colourSelected = 0;
 
-
+/**
+ * Initial setup.
+ */
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -32,6 +35,9 @@ void setup() {
   turnOffLeds(); // turn off ALL leds.
 }
 
+/**
+ * Loop this code, continual execution.
+ */
 void loop() {
   checkSerial();
   usePotentiometer();
@@ -59,7 +65,7 @@ void lightUpLeds(int numberLed) {
       pixels.setPixelColor(2, pixels.Color(0,255,0)); // green 
       break;
     case 3:
-       pixels.setPixelColor(3, pixels.Color(0,0,255)); // blue.
+       pixels.setPixelColor(3, pixels.Color(0,0,255)); // blue
       break;
     case 4:
        pixels.setPixelColor(4, pixels.Color(255,20,147)); // pink

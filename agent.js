@@ -1,3 +1,4 @@
+// AUTHOR: 210017984
 /**
  * Create a new agent object.
  * @param maxNoiseRange - the noise range

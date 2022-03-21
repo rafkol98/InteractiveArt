@@ -1,3 +1,4 @@
+<!-- AUTHOR: 210017984 -->
 <!DOCTYPE html>
 <html>
 
@@ -119,6 +120,7 @@
 <body>
   <div class="text-center">
 
+    <!-- Instructions modal. -->
     <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
       aria-hidden="true" id="instructionsModal">
       <div class="modal-dialog" style="max-width: 80%;" role="document">
@@ -169,8 +171,10 @@
       </div>
     </div>
 
+    <!-- Sketch parent/placeholder. -->
     <div id="sketch"></div>
 
+    <!-- Colours navigation bar. -->
     <div>
       <button class="boxBack" id="colour-1">Back</button>
       <button class="box box0" id="colour0"></button>
@@ -183,6 +187,7 @@
       <button class="box box7" id="colour7"></button>
     </div>
 
+    <!-- Variable control options navigation bar. -->
     <div>
       <button type="button" class="analogue" id="button1">NUMBER AGENTS</button>
       <button type="button" class="analogue" id="button2">NOISE STRENGTH</button>
@@ -201,7 +206,7 @@
 
   </div>
 
-  <!-- Bootstrap JS -->
+  <!-- Bootstrap JS. -->
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
     integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
     crossorigin="anonymous"></script>
@@ -213,6 +218,7 @@
     crossorigin="anonymous"></script>
 
   <script type="text/javascript">
+    // Show modal when page is loaded.
     $(window).on('load', function () {
       $('#instructionsModal').modal('show');
     });
