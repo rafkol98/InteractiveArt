@@ -101,7 +101,7 @@ function draw() {
     colour(i); // colour the lines.
 
     if (drawMode == 1) {
-      agents[i].modeOne(agentWidth, noiseScale, noiseStrength);
+      agents[i].normal(agentWidth, noiseScale, noiseStrength);
     } else {
       // control direction.
       if (direction == 4) {
@@ -111,7 +111,7 @@ function draw() {
           direction++;
         }
       }
-      agents[i].modeTwo(agentWidth, noiseScale, noiseStrength, direction);
+      agents[i].ultrasonicControl(agentWidth, noiseScale, noiseStrength, direction);
     }
   }
 }

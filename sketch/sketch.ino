@@ -145,6 +145,7 @@ void turnOffLeds() {
 void checkSerial() {
   if(Serial.available() > 0) {
     String getStart = Serial.readStringUntil('*');
+    
     // light up the primary colour led.
     if (getStart == "colour") {
       String ledIn = Serial.readStringUntil(';');

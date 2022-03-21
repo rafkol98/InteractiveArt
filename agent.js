@@ -1,15 +1,22 @@
-// Create a new agent.
+/**
+ * 
+ * @param {*} noiseZRange 
+ * @param {*} maxVelocity 
+ */
 var Agent = function (noiseZRange, maxVelocity) {
   this.vector = createVector(random(canvas.width), random(canvas.height));
   this.vectorOld = this.vector.copy();
   this.stepSize = random(1, maxVelocity);
   this.angle;
   this.noiseZ = random(noiseZRange);
+  // move to the left and upwards.
   this.left = true;
   this.up = true;
 };
 
-// Update agents appearance - make them move given width.
+/**
+ * Update an agent. Updates both horizontal and vertical movement but also appearance (size).
+ */
 Agent.prototype.update = function (agentWidth, left, up) {
   this.moveHorizontally(left)
   this.moveVertically(up)
@@ -22,8 +29,10 @@ Agent.prototype.update = function (agentWidth, left, up) {
   this.vectorOld = this.vector.copy(); // create old vectors copy.
 };
 
+/**
+ * Make them agents move endlessly.
+ */
 Agent.prototype.endLessMovement = function() {
-  // Make them move endlessly.
   if (this.vector.x < -10) {
     this.vector.x = this.vectorOld.x = width + 10;
   }
@@ -67,13 +76,13 @@ Agent.prototype.moveVertically = function(up) {
 }
 
 // First mode drawing.
-Agent.prototype.modeOne = function (agentWidth, noiseScale, noiseStrength) {
+Agent.prototype.normal = function (agentWidth, noiseScale, noiseStrength) {
   this.angle = noise(this.vector.x / noiseScale, this.vector.y / noiseScale, this.noiseZ) * noiseStrength;
   this.update(agentWidth, this.left, this.up);
 };
 
 // Second mode drawing.
-Agent.prototype.modeTwo = function (agentWidth, noiseScale, noiseStrength, direction) {
+Agent.prototype.ultrasonicControl = function (agentWidth, noiseScale, noiseStrength, direction) {
   this.angle = noise(this.vector.x / noiseScale, this.vector.y / noiseScale, this.noiseZ) * noiseStrength;
   if (direction == 1) {
     this.update(agentWidth, !this.left, this.up);
