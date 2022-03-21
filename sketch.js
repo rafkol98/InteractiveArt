@@ -1,5 +1,5 @@
 let serial;
-let portnName = '/dev/tty.usbmodem144401'
+let portnName = '/dev/tty.usbmodem146301'
 let inData;
 
 var canvas; // pointer to the canvas.
@@ -11,7 +11,7 @@ var agentMaxVelocity = 5;
 
 var noiseScale = 100; 
 var noiseStrength = 0;
-var noiseZRange = 0.4;
+var maxNoiseRange = 0.4;
 var overlayAlpha = 100; 
 var agentWidth = 0.3;
 var drawMode = 1;
@@ -35,7 +35,7 @@ var direction = 1;
 
 function setup() {
   // serial communication.
-  serial = new p5.SerialPort('138.251.198.84')
+  serial = new p5.SerialPort('192.168.0.4')
   serial.on('data', serialEvent);
   serial.open(portnName);
 
@@ -121,7 +121,7 @@ function draw() {
  */
 function initialiseAgents() {
   for (var i = 0; i < agentCount; i++) {
-    agents[i] = new Agent(noiseZRange, agentMaxVelocity);
+    agents[i] = new Agent(maxNoiseRange, agentMaxVelocity);
   }
 }
 
