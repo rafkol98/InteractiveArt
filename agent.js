@@ -8,8 +8,7 @@ var Agent = function (maxNoiseRange, maxVelocity) {
   this.agentVectorOld = this.agentVector.copy();
   this.stepSize = random(1, maxVelocity); // length of the step.
   this.noiseZ = random(maxNoiseRange); // create random noise (movement) up to a passed in range.
-  // move to the left and upwards.
-  this.left = true;
+  this.left = true; 
   this.up = true;
 };
 

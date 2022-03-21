@@ -12,9 +12,9 @@ var agentMaxVelocity = 5;
 var noiseScale = 100; 
 var noiseStrength = 0;
 var maxNoiseRange = 0.4;
-var overlayAlpha = 100; 
+var alphaChannel = 100; 
 var agentWidth = 0.3;
-var drawMode = 1;
+var movementMode = 1;
 
 // Colours.
 var secondColourNum = 0;
@@ -47,6 +47,36 @@ function setup() {
   initialiseAgents();
 }
 
+function draw() {
+  // Save canvas if ultrasound array has more than 5 elements.
+  if (arrayScreenshot.length > 5) {
+    saveCanvas('myCanvas', 'jpg');
+    arrayScreenshot = [];
+  }
+
+  fill(backgroundColour[0], backgroundColour[1], backgroundColour[2], alphaChannel);
+  noStroke();
+  rect(0, 0, width, height);
+
+  for (var i = 0; i < agentCount; i++) {
+    colour(i); // colour the lines.
+
+    if (movementMode == 1) {
+      agents[i].normal(agentWidth, noiseScale, noiseStrength);
+    } else {
+      // control direction - ultrasonic sensor.
+      if (direction == 4) {
+        direction = 1; // reset direction.
+      } else {
+        if (i % 100 == 0) {
+          direction++;
+        }
+      }
+      agents[i].ultrasonicControl(agentWidth, noiseScale, noiseStrength, direction);
+    }
+  }
+}
+
 function serialEvent() {
   // read a string from the serial port until newline is encountered:
   var inString = serial.readStringUntil('\r\n');
@@ -56,7 +86,7 @@ function serialEvent() {
     var sensors = split(inString, ';');
 
     if (sensors.length == 5) {
-      // initialise sensors.
+      // Read sensors values.
       potentiometer = sensors[0];
       ultrasound = sensors[1];
       joy_x = sensors[2];
@@ -86,35 +116,7 @@ function serialEvent() {
   }
 }
 
-function draw() {
-  // Save canvas if ultrasound array has more than 5 elements.
-  if (arrayScreenshot.length > 5) {
-    saveCanvas('myCanvas', 'jpg');
-    arrayScreenshot = [];
-  }
 
-  fill(backgroundColour[0], backgroundColour[1], backgroundColour[2], overlayAlpha);
-  noStroke();
-  rect(0, 0, width, height);
-
-  for (var i = 0; i < agentCount; i++) {
-    colour(i); // colour the lines.
-
-    if (drawMode == 1) {
-      agents[i].normal(agentWidth, noiseScale, noiseStrength);
-    } else {
-      // control direction.
-      if (direction == 4) {
-        direction = 1; // reset direction.
-      } else {
-        if (i % 100 == 0) {
-          direction++;
-        }
-      }
-      agents[i].ultrasonicControl(agentWidth, noiseScale, noiseStrength, direction);
-    }
-  }
-}
 
 /**
  * Initialise the agents.
@@ -136,10 +138,9 @@ function goBackButton() {
 }
 
 /**
- * 
+ * Activate option when button is pressed while hovering that option.
  */
 function joyButtonPressed() {
-
 
   if (joy_pressed == 1) {
     $('#instructionsModal').modal('hide');
@@ -180,7 +181,7 @@ function joyButtonPressed() {
 }
 
 /**
- * 
+ * Control the variables/options and change their values accordingly.
  */
 function controlOptions() {
   // NUMBER AGENTS.
@@ -207,8 +208,8 @@ function controlOptions() {
   }
   // ALPHA CHANNEL.
   else if (buttonActivated == 5) {
-    overlayAlpha = manualMap(potentiometer, 0, 1023, 1, 200);
-    console.log(overlayAlpha)
+    alphaChannel = manualMap(potentiometer, 0, 1023, 1, 200);
+    console.log(alphaChannel)
   }
 
    // AGENTS PRIMARY COLOUR.
@@ -222,15 +223,13 @@ function controlOptions() {
  */
 function controlUltrasound() {
   // Change draw mode.
-  ultrasound <= 20 ? drawMode = 2 : drawMode = 1;
+  ultrasound <= 20 ? movementMode = 2 : movementMode = 1;
 
-  console.log(ultrasound);
   // If ultrasound reading is 1185 it means that the user is touching the sensor.
   // If they do that then populate an array which will be used to save canvas - screenshot
   // when it has more than 15 elements i.e. when the user has been holding their hand there for ~1 second.
   if (ultrasound > 1180) {
     arrayScreenshot.push(true);
-    console.log("mesa")
   } else {
     arrayScreenshot = [];
   }
@@ -238,7 +237,6 @@ function controlUltrasound() {
 
 /**
  * Acts as a hovering button - gets activated when joystick is on an option.
- * @param {} numberButton 
  */
 function hovering(stringIn, numberButton) {
   dehoverOthers(stringIn);
@@ -250,7 +248,7 @@ function hovering(stringIn, numberButton) {
 }
 
 /**
- * Deselect other options.
+ * Dehover other options.
  */
 function dehoverOthers(stringIn) {
   if (stringIn == "button") {
@@ -281,9 +279,7 @@ function deactivateOptions(stringIn) {
 }
 
 /**
- * Activate an option.
- * @param {*} stringIn 
- * @param {*} numberButton 
+ * Activate an option, turning its background red.
  */
 function activateOption(stringIn, numberButton) {
   deactivateOptions(stringIn);
