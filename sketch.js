@@ -4,35 +4,39 @@ let inData;
 
 var canvas; // pointer to the canvas.
 
-// Interactive agents.
+
 var agents = [];
-var agentCount = 100;
+// Agent constructor
+var maxNoiseRange = 0.4;
 var agentMaxVelocity = 5;
 
+// Initialise variables used for the agents.
+var agentCount = 100;
 var noiseScale = 100; 
 var noiseStrength = 0;
-var maxNoiseRange = 0.4;
 var alphaChannel = 100; 
 var agentWidth = 0.3;
 var movementMode = 1;
 
 // Colours.
-var secondColourNum = 0;
-var colourNum = 0;
-var backgroundColour = [20, 20, 20]
+var colourNum = 0; // primary colour.
+var secondColourNum = 0; // secondary colour.
+var backgroundColour = [20, 20, 20] // background colour.
 
-// Buttons.
+// Variable that holds the number of the activated button.
 var buttonActivated;
-var ready = false;
 
 // Serial controls.
-var potentiometer, ultrasound, joy_x,  joy_colour, joy_pressed;
+var potentiometer, ultrasound, joy_x, joy_colour, joy_pressed;
 
 // Ultrasound sensor.
-var arrayScreenshot = new Array();  // Screenshot using ultrasound sensor.
+var arrayScreenshot = new Array();  // Use this array to save the canvas using the ultrasound sensor.
 var direction = 1;
 
 
+/**
+ * Setup the sketch.
+ */
 function setup() {
   // serial communication.
   serial = new p5.SerialPort('192.168.0.4')
@@ -47,27 +51,37 @@ function setup() {
   initialiseAgents();
 }
 
+/**
+ * Draw sketch - repeated continously.
+ */
 function draw() {
   // Save canvas if ultrasound array has more than 5 elements.
   if (arrayScreenshot.length > 5) {
     saveCanvas('myCanvas', 'jpg');
-    arrayScreenshot = [];
+    arrayScreenshot = []; // empty the array for next usage.
   }
 
+  // fill the background colour of the canvas.
   fill(backgroundColour[0], backgroundColour[1], backgroundColour[2], alphaChannel);
   noStroke();
   rect(0, 0, width, height);
 
+  // Iterate through the agents.
   for (var i = 0; i < agentCount; i++) {
-    colour(i); // colour the lines.
+    colour(i); // colour each agent.
 
+    // if movementMode is 1 then move the agent normally.
     if (movementMode == 1) {
       agents[i].normal(agentWidth, noiseScale, noiseStrength);
-    } else {
-      // control direction - ultrasonic sensor.
+    } 
+    // Otherwise use the ultrasonic control to reverse their motion.
+    else {
+      // control direction.
       if (direction == 4) {
         direction = 1; // reset direction.
-      } else {
+      } 
+      else {
+        // update direction every 100 agents iterated (so that it does not change immediately back to where it was).
         if (i % 100 == 0) {
           direction++;
         }
@@ -77,8 +91,11 @@ function draw() {
   }
 }
 
+/**
+ * Read a string from the serial port until newline is encountered. Used to read in the sensors values and 
+ * act accordingly.
+ */
 function serialEvent() {
-  // read a string from the serial port until newline is encountered:
   var inString = serial.readStringUntil('\r\n');
 
   if (inString.length > 0) {
@@ -99,12 +116,12 @@ function serialEvent() {
       if (buttonActivated != 6 && buttonActivated != 7 && buttonActivated != 8) {
         hovering("button", joy_x);
       }
-      // hover the colours.
+      // If its the colour options then hover the colour menu.
       else {
         hovering("colour", joy_colour)
       }
 
-      // Handle press of button.
+      // Handle press of joystick button.
       joyButtonPressed();
 
       // Handle control the options.
@@ -116,25 +133,13 @@ function serialEvent() {
   }
 }
 
-
-
 /**
- * Initialise the agents.
+ * Initialise the agents. Populates the agents array.
  */
 function initialiseAgents() {
   for (var i = 0; i < agentCount; i++) {
     agents[i] = new Agent(maxNoiseRange, agentMaxVelocity);
   }
-}
-
-/**
- * Handle the go back button.
- */
-function goBackButton() {
-  buttonActivated = null;
-  deactivateOptions("button");
-  deactivateOptions("colour");
-  dehoverOthers("colour");
 }
 
 /**
@@ -263,7 +268,7 @@ function dehoverOthers(stringIn) {
 }
 
 /**
- * Deactivate options.
+ * Deactivate all the options, changing their border back to black.
  */
 function deactivateOptions(stringIn) {
   for (let i = 1; i <= 7; i++) {
@@ -279,7 +284,8 @@ function deactivateOptions(stringIn) {
 }
 
 /**
- * Activate an option, turning its background red.
+ * Activate an option, turning its background and border red if its a variable button. If its a colour
+ * option then only make its border red so that it is still understandable which colour it represents.
  */
 function activateOption(stringIn, numberButton) {
   deactivateOptions(stringIn);
@@ -291,11 +297,6 @@ function activateOption(stringIn, numberButton) {
 
 /**
  * Manual implementation of scale - map function. Maps a range of values to another.
- * @param {*} number 
- * @param {*} inMin 
- * @param {*} inMax 
- * @param {*} outMin 
- * @param {*} outMax 
  */
 function manualMap(number, inMin, inMax, outMin, outMax) {
   return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
@@ -360,4 +361,14 @@ function colour(index) {
   } else if (secondColourNum == 7 && (index % 10 == 0)) {
     stroke(150, 50, 0)
   }
+}
+
+/**
+ * Handle the go back button on the colour navigation bar.
+ */
+function goBackButton() {
+  buttonActivated = null;
+  deactivateOptions("button");
+  deactivateOptions("colour");
+  dehoverOthers("colour");
 }
